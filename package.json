@@ -1,0 +1,39 @@
+{
+    "name": "@cashmoney/number",
+    "description": "Wrapper around bignumber.js providing string-only representation of arbitrary-precision decimal numbers.",
+    "version": "1.0.0",
+    "license": "MIT",
+    "author": "Matthew Gamble <git@matthewgamble.net>",
+    "dependencies": {
+        "bignumber.js": "^9.0.0"
+    },
+    "devDependencies": {
+        "alsatian": "^3.2.1",
+        "ts-node": "^8.6.2",
+        "tsconfig-paths": "^3.9.0",
+        "typescript": "^3.7.5"
+    },
+    "scripts": {
+        "build": "tsc",
+        "test": "node run-tests.js 'tests/**/*.test.ts'"
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "src/**/*.ts",
+        "dist/**/*.js",
+        "dist/**/*.d.ts",
+        "dist/**/*.js.map",
+        "tsconfig.json"
+    ],
+    "sideEffects": false,
+    "homepage": "https://github.com/djmattyg007/js-number",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/djmattyg007/js-number.git"
+    },
+    "keywords": [
+        "number",
+        "bignumber"
+    ]
+}
