@@ -4,6 +4,8 @@ import { TestFixture, Test, TestCases, Expect } from "alsatian";
 import Num from "src/number";
 import { numeric } from "src/types";
 
+import { sumExamples, minExamples, maxExamples, avgExamples } from "fixtures/aggregate";
+
 const DEFAULT_AMOUNT = 10;
 
 @TestFixture("Number")
@@ -783,5 +785,29 @@ export default class NumTest {
         const throwFn = () => six.ratioOf(zero);
 
         Expect(throwFn).toThrowError(Error, "Cannot calculate a ratio of zero.");
+    }
+
+    @TestCases(minExamples)
+    @Test("it calculates min")
+    public itCalculatesMin(values: Num[], min: Num) {
+        Expect(Num.min(...values)).toBe(min);
+    }
+
+    @TestCases(maxExamples)
+    @Test("it calculates max")
+    public itCalculatesMax(values: Num[], max: Num) {
+        Expect(Num.max(...values)).toBe(max);
+    }
+
+    @TestCases(sumExamples)
+    @Test("it calculates sums")
+    public itCalculatesSum(values: Num[], sum: Num) {
+        Expect(Num.sum(...values)).toBe(sum);
+    }
+
+    @TestCases(avgExamples)
+    @Test("it calculates averages")
+    public itCalculatesAverage(values: Num[], avg: Num) {
+        Expect(Num.avg(...values)).toBe(avg);
     }
 }
