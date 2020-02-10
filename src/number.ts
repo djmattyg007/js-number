@@ -272,12 +272,20 @@ export default class Num {
         return this.multiply(multiplier);
     }
 
+    public multipliedBy(multiplier: numeric): Num {
+        return this.multiply(multiplier);
+    }
+
     public divide(divisor: numeric): Num {
         if ((new BigNumber(divisor)).isZero() === true) {
             throw new Error("Cannot divide by zero.");
         }
 
         return new Num(this.num.dividedBy(divisor));
+    }
+
+    public dividedBy(divisor: numeric): Num {
+        return this.divide(divisor);
     }
 
     public percent(percent: number): Num {

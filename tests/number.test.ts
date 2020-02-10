@@ -106,8 +106,84 @@ export default class NumTest {
         ];
     }
 
+    @TestCases(NumTest.subtractExamples)
+    @Test("it subtracts numbers")
+    public itSubtractsNumbers(subtrahend: number, result1: string, result2: string, result1Alt: string) {
+        const num = new Num(DEFAULT_AMOUNT);
+        const result1Num = num.subtract(subtrahend);
+        const result2Num = result1Num.subtract(subtrahend);
+
+        Expect(result1Num instanceof Num).toBeTruthy();
+        Expect(result1Num).toBe(new Num(result1));
+        Expect(result1Num.toString()).toBe(result1);
+        Expect(result2Num instanceof Num).toBeTruthy();
+        Expect(result2Num).toBe(new Num(result2));
+        Expect(result2Num.toString()).toBe(result2);
+
+        const result1NumAlt = (new Num(subtrahend)).subtract(DEFAULT_AMOUNT);
+        const result2NumAlt = (new Num(subtrahend)).subtract(result1NumAlt);
+
+        Expect(result1NumAlt instanceof Num).toBeTruthy();
+        Expect(result1NumAlt).toBe(new Num(result1Alt));
+        Expect(result1NumAlt.toString()).toBe(result1Alt);
+        Expect(result2NumAlt instanceof Num).toBeTruthy();
+        Expect(result2NumAlt).toBe(new Num(DEFAULT_AMOUNT));
+        Expect(result2NumAlt.toString()).toBe(String(DEFAULT_AMOUNT));
+    }
+
+    public static subtractExamples() {
+        return [
+            [0, '10', '10', '-10'],
+            [5, '5', '0', '-5'],
+            [10, '0', '-10', '0'],
+            [100, '-90', '-190', '90'],
+            [-0, '10', '10', '-10'],
+            [-5, '15', '20', '-15'],
+            [-50, '60', '110', '-60'],
+        ];
+    }
+
+    // TODO: Introduce property-based testing for this test
+    @TestCases(NumTest.constantNumberExamples)
+    @Test("it multiplies the amount")
+    public itMultipliesTheAmount(multiplier: number) {
+        const oneNum = new Num(1);
+        const tenNum = new Num(10);
+
+        const checkFunc = (numOne: Num, numTen: Num): void => {
+            Expect(numOne).toBe(new Num(multiplier));
+            Expect(numOne.toString()).toBe(String(multiplier));
+
+            Expect(numTen).toBe(numOne.shiftRight(1));
+            Expect(numOne).toBe(numTen.shiftLeft(1));
+        };
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const multipliedOne = oneNum.multiply(multiplier);
+        const multipliedTen = tenNum.multiply(multiplier);
+        checkFunc(multipliedOne, multipliedTen);
+
+        const timesOne = oneNum.times(multiplier);
+        const timesTen = tenNum.times(multiplier);
+        checkFunc(timesOne, timesTen);
+        compare(multipliedOne, timesOne);
+        compare(multipliedTen, timesTen);
+
+        const multipliedByOne = oneNum.multipliedBy(multiplier);
+        const multipliedByTen = tenNum.multipliedBy(multiplier);
+        checkFunc(multipliedByOne, multipliedByTen);
+        compare(multipliedOne, multipliedByOne);
+        compare(multipliedTen, multipliedByTen);
+        compare(timesOne, multipliedByOne);
+        compare(timesTen, multipliedByTen);
+    }
+
     // TOOD: Introduce property-based testing for this test
-    @TestCases(NumTest.multiplyingByConstantExamples)
+    @TestCases(NumTest.constantNumberExamples)
     @Test("multiplying by zero always gives zero")
     public multiplyingByZeroGivesZero(amount: number) {
         const num = new Num(amount);
@@ -123,7 +199,7 @@ export default class NumTest {
     }
 
     // TOOD: Introduce property-based testing for this test
-    @TestCases(NumTest.multiplyingByConstantExamples)
+    @TestCases(NumTest.constantNumberExamples)
     @Test("multiplying by one gives the same amount")
     public multiplyingByOneGivesSameAmount(amount: number) {
         const num = new Num(amount);
@@ -134,9 +210,103 @@ export default class NumTest {
         Expect(multipliedNum).toEqual(num);
     }
 
-    public static multiplyingByConstantExamples() {
+    public static constantNumberExamples() {
         const numbers = [1, 0.1, 0.5, 2, 10, 10.5, 100, 0, -0.1, -0.5, -1, -2, -10, -15.8, -100];
         return numbers.map(num => [num]);
+    }
+
+    @TestCases(NumTest.divisionExamples)
+    @Test("it divides the amount")
+    public itDividesTheAmount(amount: number, divisor: number, expected: string) {
+        const num = new Num(amount);
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const result1 = num.divide(divisor);
+        const result2 = num.dividedBy(divisor);
+        compare(result1, result2);
+
+        Expect(result1 instanceof Num).toBeTruthy();
+        Expect(result1).toBe(new Num(expected));
+        Expect(result1.toString()).toBe(expected);
+        Expect(result2 instanceof Num).toBeTruthy();
+        Expect(result2).toBe(new Num(expected));
+        Expect(result2.toString()).toBe(expected);
+    }
+
+    public static divisionExamples() {
+        return [
+            [1, 1, '1'],
+            [1, 2, '0.5'],
+            [1, 3, '0.33333333333333333333'],
+            [2, 2, '1'],
+            [2, 1, '2'],
+            [2, 4, '0.5'],
+            [4, 2, '2'],
+            [4, 0.5, '8'],
+            [24, 8, '3'],
+            [20, 8, '2.5'],
+            [-1, 1, '-1'],
+            [-1, 2, '-0.5'],
+            [-2, 1, '-2'],
+            [-2, 2, '-1'],
+            [-2, 4, '-0.5'],
+            [-4, 2, '-2'],
+            [-4, 0.5, '-8'],
+            [-24, 8, '-3'],
+            [-20, 8, '-2.5'],
+        ];
+    }
+
+    // TODO: Introduce property-based testing for this test
+    @TestCases(NumTest.constantNumberExamples)
+    @Test("dividing by one gives the same amount")
+    public dividingByOneGivesSameAmount(amount: number) {
+        const num = new Num(amount);
+        const dividedNum = num.divide(1);
+
+        Expect(dividedNum instanceof Num).toBeTruthy();
+        Expect(dividedNum).toBe(num);
+        Expect(dividedNum.toString()).toBe(String(amount));
+    }
+
+    // TODO: Introduce property-based testing for this test
+    @TestCases(NumTest.constantNumberExamples)
+    @Test("dividing zero by anything gives zero")
+    public dividingZeroByAnythingGivesZero(amount: number) {
+        if (amount === 0) {
+            // Easier than anything else
+            return;
+        }
+
+        const num = new Num(0);
+        const dividedNum = num.divide(amount);
+
+        Expect(dividedNum instanceof Num).toBeTruthy();
+        Expect(dividedNum).toBe(num);
+
+        if (dividedNum.isPositive === true) {
+            Expect(dividedNum.toString()).toBe("0");
+        } else {
+            Expect(dividedNum.toString()).toBe("-0");
+        }
+    }
+
+    @Test("it disallows divide-by-zero")
+    public itDisallowsDivideByZero() {
+        const num = new Num(1);
+
+        Expect(() => num.divide(0)).toThrow();
+        Expect(() => num.dividedBy(0)).toThrow();
+        Expect(() => num.divide("0")).toThrow();
+        Expect(() => num.dividedBy("0")).toThrow();
+        Expect(() => num.divide(-0)).toThrow();
+        Expect(() => num.dividedBy(-0)).toThrow();
+        Expect(() => num.divide("-0")).toThrow();
+        Expect(() => num.dividedBy("-0")).toThrow();
     }
 
     @TestCases(NumTest.numberExamples)
