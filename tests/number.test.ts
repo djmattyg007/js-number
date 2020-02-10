@@ -1,17 +1,19 @@
 import { TestFixture, Test, TestCases, Expect } from "alsatian";
 
-import Num from "src/_number";
+import Num from "src/number";
 
 @TestFixture("Number")
 export default class NumberTest {
     @TestCases(NumberTest.numberExamples)
     @Test("it has attributes")
-    public itHasAttributes(num: string, decimal: boolean, half: boolean, currentEven: boolean, negative: boolean, integerPart: string, fractionalPart: string) {
-        const numObj = Num.fromString(num);
+    public itHasAttributes(num: string | number, decimal: boolean, half: boolean, even: boolean, negative: boolean, integerPart: string, fractionalPart: string) {
+        const numObj = new Num(num);
 
+        Expect(numObj.isInteger).toBe(!decimal);
         Expect(numObj.isDecimal).toBe(decimal);
         Expect(numObj.isHalf).toBe(half);
-        Expect(numObj.isCurrentEven).toBe(currentEven);
+        Expect(numObj.isEven).toBe(even);
+        Expect(numObj.isPositive).toBe(!negative);
         Expect(numObj.isNegative).toBe(negative);
         Expect(numObj.integerPart).toBe(integerPart);
         Expect(numObj.fractionalPart).toBe(fractionalPart);
@@ -21,35 +23,42 @@ export default class NumberTest {
     @TestCases(NumberTest.invalidNumberExamples)
     @Test("it fails parsing invalid numbers")
     public itFailsParsingInvalidNumbers(num: string) {
-        const throwFn = () => Num.fromString(num);
+        const throwFn = () => new Num(num);
 
         Expect(throwFn).toThrow(); 
     }
 
-    @TestCases(NumberTest.base10Examples)
-    @Test("base10")
-    public base10(numStr: string, baseNum: number, expected: string) {
-        const numObj = Num.fromString(numStr);
+    @TestCases(NumberTest.shiftExamples)
+    @Test("it shifts the decimal place left and right")
+    public shift(numStr: string, n: number, shiftLeftExpected: string, shiftRightExpected: string) {
+        const shiftLeftExpectedObj = new Num(shiftLeftExpected);
+        const shiftRightExpectedObj = new Num(shiftRightExpected);
 
-        Expect(String(numObj.base10(baseNum))).toBe(expected);
-    }
+        const shiftFunc = (numObj: Num): void => {
+            const numObjShiftedLeft = numObj.shiftLeft(n);
+            const numObjShiftedRight = numObj.shiftRight(n);
+            Expect(numObjShiftedLeft).toBe(shiftLeftExpectedObj);
+            Expect(String(numObjShiftedLeft)).toBe(shiftLeftExpected);
+            Expect(numObjShiftedRight).toBe(shiftRightExpectedObj);
+            Expect(String(numObjShiftedRight)).toBe(shiftRightExpected);
+        };
 
-    @TestCases(NumberTest.numericExamples)
-    @Test("it creates a number from a numeric value")
-    public itCreatesANumberFromANumericValue(num: number) {
-        const numObj = Num.fromNumber(num);
-        Expect(numObj instanceof Num).toBeTruthy();
+        shiftFunc(new Num(numStr));
+        shiftFunc(new Num(parseFloat(numStr)));
     }
 
     public static numberExamples() {
         const maxIntStr = String(Number.MAX_SAFE_INTEGER);
         const minIntStr = String(Number.MIN_SAFE_INTEGER);
 
-        return [
+        const simpleExamples = [
+            [0, false, false, true, false, '0', ''],
             ['0', false, false, true, false, '0', ''],
+            ['000', false, false, true, false, '0', ''],
             ['0.00', false, false, true, false, '0', ''],
             ['0.5', true, true, true, false, '0', '5'],
             ['0.500', true, true, true, false, '0', '5'],
+            ['005', false, false, false, false, '5', ''],
             ['-0', false, false, true, true, '-0', ''],
             ['-0.5', true, true, true, true, '-0', '5'],
             ['3', false, false, false, false, '3', ''],
@@ -68,6 +77,11 @@ export default class NumberTest {
             ['-10.5', true, true, true, true, '-10', '5'],
             ['-.5', true, true, true, true, '-0', '5'],
             ['.5', true, true, true, false, '0', '5'],
+        ];
+
+        const complexExamples = [
+            ['+123456789', false, false, false, false, '123456789', ''],
+            ['+123456789012345678.13456', true, false, true, false, '123456789012345678', '13456'],
             [maxIntStr, false, false, false, false, maxIntStr, ''],
             [minIntStr, false, false, false, true, minIntStr, ''],
             [
@@ -98,51 +112,45 @@ export default class NumberTest {
                 '',
             ],
         ];
+
+        const finalExampleList = [];
+        for (const row of simpleExamples) {
+            finalExampleList.push(row);
+            const numVersion = row.slice();
+            numVersion[0] = Number(row[0]);
+            finalExampleList.push(numVersion);
+        }
+
+        return finalExampleList.concat(complexExamples);
     }
 
     public static invalidNumberExamples() {
         return [
             [''],
-            ['000'],
-            ['005'],
             ['123456789012345678-123456'],
             ['---123'],
             ['123456789012345678+13456'],
             ['-123456789012345678.-13456'],
-            ['+123456789'],
             ['+123456789012345678.+13456'],
         ];
     }
 
-    public static base10Examples() {
+    public static shiftExamples() {
         return [
-            ['0', 10, '0'],
-            ['5', 1, '0.5'],
-            ['50', 2, '0.5'],
-            ['50', 3, '0.05'],
-            ['0.5', 2, '0.005'],
-            ['500', 2, '5'],
-            ['500', 0, '500'],
-            ['500', -2, '50000'],
-            ['0.5', -2, '50'],
-            ['0.5', -3, '500'],
-            ['-5', 3, '-0.005'],
-            ['-5', -3, '-5000'],
-            ['-0.05', -3, '-50'],
-            ['-0.5', -3, '-500'],
-        ];
-    }
-
-    public static numericExamples() {
-        return [
-            [1],
-            [-1],
-            [1.0],
-            [-1.0],
-            ['1'],
-            ['-1'],
-            ['1.0'],
-            ['-1.0'],
+            ['0', 10, '0', '0'],
+            ['5', 1, '0.5', '50'],
+            ['50', 2, '0.5', '5000'],
+            ['50', 3, '0.05', '50000'],
+            ['0.5', 2, '0.005', '50'],
+            ['500', 2, '5', '50000'],
+            ['500', 0, '500', '500'],
+            ['500', -2, '50000', '5'],
+            ['0.5', -2, '50', '0.005'],
+            ['0.5', -3, '500', '0.0005'],
+            ['-5', 3, '-0.005', '-5000'],
+            ['-5', -3, '-5000', '-0.005'],
+            ['-0.05', -3, '-50', '-0.00005'],
+            ['-0.5', -3, '-500', '-0.0005'],
         ];
     }
 }

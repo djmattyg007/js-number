@@ -35,7 +35,12 @@ export default class Num {
 
         const numStr = this.num.toFixed();
         const numStrParts = numStr.split(".");
-        this.integerPart = numStrParts[0];
+        if (this.num.isZero() && this.num.isNegative()) {
+            this.integerPart = "-0";
+        } else {
+            this.integerPart = numStrParts[0];
+        }
+
         if (numStrParts.length === 2) {
             this.fractionalPart = numStrParts[1];
         } else {
@@ -54,6 +59,10 @@ export default class Num {
     }
 
     public toString(): string {
+        if (this.num.isZero() && this.num.isNegative()) {
+            return "-0";
+        }
+
         return this.num.toFixed();
     }
 
@@ -458,6 +467,34 @@ export default class Num {
         }
 
         return amount.dividedBy(other);
+    }
+
+    public shiftRight(n: number): Num {
+        return new Num(Num.shiftRight(this.num, n));
+    }
+
+    public static shiftRight(amount: Num | numeric, n: number): BigNumber {
+        if (Number.isInteger(n) === false) {
+            throw new Error("Can only shift by whole number amounts.");
+        }
+
+        amount = Num.convertToBigNum(amount);
+
+        return amount.shiftedBy(n);
+    }
+
+    public shiftLeft(n: number): Num {
+        return new Num(Num.shiftLeft(this.num, n));
+    }
+
+    public static shiftLeft(amount: Num | numeric, n: number): BigNumber {
+        if (Number.isInteger(n) === false) {
+            throw new Error("Can only shift by whole number amounts.");
+        }
+
+        amount = Num.convertToBigNum(amount);
+
+        return amount.shiftedBy(-n);
     }
 
     public static min(...collection: (Num | numeric)[]): Num {

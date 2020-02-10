@@ -56,16 +56,6 @@ export class NumMatcher extends Matcher<Num> {
         );
     }
 
-    public toHaveSameCurrency(other: Num) {
-        this._registerMatcher(
-            (this.actualValue.isSameCurrency(other)) === this.shouldMatch,
-            `Expected ${JSON.stringify(this.actualValue)} ${
-                !this.shouldMatch ? "not " : ""
-            }` + `to have the same currency as ${JSON.stringify(other)}.`,
-            other
-        );
-    }
-
     public toBeZero() {
         this._registerMatcher(
             (this.actualValue.isZero) === this.shouldMatch,
@@ -93,6 +83,46 @@ export class NumMatcher extends Matcher<Num> {
                 !this.shouldMatch ? "not " : ""
             }` + `to be negative.`,
             this.shouldMatch ? "negative" : "positive"
+        );
+    }
+
+    public toBeAnInteger() {
+        this._registerMatcher(
+            (this.actualValue.isInteger) === this.shouldMatch,
+            `Expected ${JSON.stringify(this.actualValue)} ${
+                !this.shouldMatch ? "not " : ""
+            }` + `to be an integer.`,
+            this.shouldMatch ? "integer" : "decimal"
+        );
+    }
+
+    public toBeADecimal() {
+        this._registerMatcher(
+            (this.actualValue.isDecimal) === this.shouldMatch,
+            `Expected ${JSON.stringify(this.actualValue)} ${
+                !this.shouldMatch ? "not " : ""
+            }` + `to be a decimal.`,
+            this.shouldMatch ? "decimal" : "integer"
+        );
+    }
+
+    public toBeEven() {
+        this._registerMatcher(
+            (this.actualValue.isEven) === this.shouldMatch,
+            `Expected ${JSON.stringify(this.actualValue)} ${
+                !this.shouldMatch ? "not " : ""
+            }` + `to be even.`,
+            this.shouldMatch ? "even" : "odd"
+        );
+    }
+
+    public toBeOdd() {
+        this._registerMatcher(
+            (this.actualValue.isOdd) === this.shouldMatch,
+            `Expected ${JSON.stringify(this.actualValue)} ${
+                !this.shouldMatch ? "not " : ""
+            }` + `to be odd.`,
+            this.shouldMatch ? "odd" : "even"
         );
     }
 }
