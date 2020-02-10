@@ -288,7 +288,7 @@ export default class Num {
         return this.divide(divisor);
     }
 
-    public percent(percent: number): Num {
+    public percentage(percent: number): Num {
         if (percent < 0 || percent > 100) {
             throw new RangeError("Percentage values must be between 0 and 100.");
         }
@@ -296,11 +296,23 @@ export default class Num {
         return this.multiply(percent / 100);
     }
 
-    public subtractPercent(percent: number): Num {
+    public percent(percent: number): Num {
+        return this.percentage(percent);
+    }
+
+    public subtractPercentage(percent: number): Num {
         return new Num(Num.subtractPercent(this.num, percent));
     }
 
+    public subtractPercent(percent: number): Num {
+        return this.subtractPercentage(percent);
+    }
+
     public static subtractPercent(amount: Num | numeric, percent: number): BigNumber {
+        if (percent < 0 || percent > 100) {
+            throw new RangeError("Percentage values must be between 0 and 100.");
+        }
+
         amount = Num.convertToBigNum(amount);
 
         const percentage = amount.multipliedBy(percent / 100);
@@ -501,9 +513,10 @@ export default class Num {
 
     public static ratioOf(amount: Num | numeric, other: Num | numeric): BigNumber {
         amount = Num.convertToBigNum(amount);
+        other = Num.convertToBigNum(other);
 
-        if (other instanceof Num) {
-            other = other.num;
+        if (other.isZero() === true) {
+            throw new Error("Cannot calculate a ratio of zero.");
         }
 
         return amount.dividedBy(other);

@@ -1,3 +1,4 @@
+/// <reference path = "../src/alsatian-ambient.d.ts" />
 import { TestFixture, Test, TestCases, Expect } from "alsatian";
 
 import Num from "src/number";
@@ -496,6 +497,95 @@ export default class NumTest {
         ];
     }
 
+    @TestCases(NumTest.percentageExamples)
+    @Test("it calculates percentages")
+    public itCalculatesPercentages(amount: number, percent: number, expected: string) {
+        const num = new Num(amount);
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const percentageNum = num.percentage(percent);
+        const percentNum = num.percent(percent);
+        compare(percentageNum, percentNum);
+
+        Expect(percentageNum instanceof Num).toBeTruthy();
+        Expect(percentageNum).toBe(new Num(expected));
+        Expect(percentageNum.toString()).toBe(expected);
+    }
+
+    public static percentageExamples() {
+        return [
+            [0, 0, '0'],
+            [350, 0, '0'],
+            [350, 100, '350'],
+            [350, 50, '175'],
+            [10, 100, '10'],
+            [10, 30, '3'],
+            [10, 25, '2.5'],
+            [10, 24, '2.4'],
+            [10, 26, '2.6'],
+            [100, 25, '25'],
+        ];
+    }
+
+    @TestCases(NumTest.subtractPercentageExamples)
+    @Test("it subtracts a percentage")
+    public itSubtractsAPercentage(amount: number, percent: number, expected: string) {
+        const num = new Num(amount);
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const percentageNum = num.subtractPercentage(percent);
+        const percentNum = num.subtractPercent(percent);
+        compare(percentageNum, percentNum);
+
+        Expect(percentageNum instanceof Num).toBeTruthy();
+        Expect(percentageNum).toBe(new Num(expected));
+        Expect(percentageNum.toString()).toBe(expected);
+    }
+
+    public static subtractPercentageExamples() {
+        return [
+            [100, 25, '75'],
+            [80, 25, '60'],
+            [80, 75, '20'],
+            [60, 70, '18'],
+            [99.99, 15, '84.9915'],
+            [50, 0, '50'],
+            [250, 100, '0'],
+        ];
+    }
+
+    @TestCases(NumTest.invalidPercentageExamples)
+    @Test("it throws for invalid percentages")
+    public itThrowsForInvalidPercentages(percent: number) {
+        const num = new Num(DEFAULT_AMOUNT);
+
+        const throwFn1 = () => num.percentage(percent);
+        const throwFn2 = () => num.subtractPercentage(percent);
+
+        const errMsg = "Percentage values must be between 0 and 100.";
+        Expect(throwFn1).toThrowError(RangeError, errMsg);
+        Expect(throwFn2).toThrowError(RangeError, errMsg);
+    }
+
+    public static invalidPercentageExamples() {
+        return [
+            [100.01],
+            [101],
+            [1000],
+            [-0.01],
+            [-1],
+            [-101],
+        ];
+    }
+
     @TestCases(NumTest.numberExamples)
     @Test("it has attributes")
     public itHasAttributes(num: string | number, decimal: boolean, half: boolean, even: boolean, negative: boolean, integerPart: string, fractionalPart: string) {
@@ -597,9 +687,10 @@ export default class NumTest {
 
         const shiftFunc = (numObj: Num): void => {
             const numObjShiftedLeft = numObj.shiftLeft(n);
-            const numObjShiftedRight = numObj.shiftRight(n);
             Expect(numObjShiftedLeft).toBe(shiftLeftExpectedObj);
             Expect(String(numObjShiftedLeft)).toBe(shiftLeftExpected);
+
+            const numObjShiftedRight = numObj.shiftRight(n);
             Expect(numObjShiftedRight).toBe(shiftRightExpectedObj);
             Expect(String(numObjShiftedRight)).toBe(shiftRightExpected);
         };
@@ -625,5 +716,72 @@ export default class NumTest {
             ['-0.05', -3, '-50', '-0.00005'],
             ['-0.5', -3, '-500', '-0.0005'],
         ];
+    }
+
+    @Test("it converts to JSON")
+    public itConvertsToJson() {
+        const num = new Num(DEFAULT_AMOUNT);
+
+        const jsonStringifyOutput = JSON.stringify(num);
+        Expect(jsonStringifyOutput).toBe('"' + String(DEFAULT_AMOUNT) + '"');
+
+        const toJsonOutput = num.toJSON();
+        Expect(toJsonOutput).toBe(String(DEFAULT_AMOUNT));
+    }
+
+    @Test("it supports max safe integer")
+    public itSupportsMaxSafeInteger() {
+        const maxInt = new Num(Number.MAX_SAFE_INTEGER);
+        const maxIntPlusOne = maxInt.plus(1);
+        const maxIntMinusOne = maxInt.minus(1);
+
+        const checkFn = (num: Num): void => {
+            Expect(num instanceof Num).toBeTruthy();
+            Expect(num).toBeAnInteger();
+            Expect(num).not.toBeADecimal();
+        };
+
+        checkFn(maxInt);
+        checkFn(maxIntPlusOne);
+        checkFn(maxIntMinusOne);
+    }
+
+    @Test("it supports min safe integer")
+    public itSupportsMinSafeInteger() {
+        const minInt = new Num(Number.MIN_SAFE_INTEGER);
+        const minIntPlusOne = minInt.plus(1);
+        const minIntMinusOne = minInt.minus(1);
+
+        const checkFn = (num: Num): void => {
+            Expect(num instanceof Num).toBeTruthy();
+            Expect(num).toBeAnInteger();
+            Expect(num).not.toBeADecimal();
+        };
+
+        checkFn(minInt);
+        checkFn(minIntPlusOne);
+        checkFn(minIntMinusOne);
+    }
+
+    @Test("it returns ratio of")
+    public itReturnsRatioOf() {
+        const zero = new Num(0);
+        const three = new Num(3);
+        const six = new Num(6);
+
+        Expect(zero.ratioOf(six).toString()).toBe("0");
+        Expect(three.ratioOf(six).toString()).toBe("0.5");
+        Expect(three.ratioOf(three).toString()).toBe("1");
+        Expect(six.ratioOf(three).toString()).toBe("2");
+    }
+
+    @Test("it throws when calculating ratio of zero")
+    public itThrowsWhenCalculatingRatioOfZero() {
+        const zero = new Num(0);
+        const six = new Num(6);
+
+        const throwFn = () => six.ratioOf(zero);
+
+        Expect(throwFn).toThrowError(Error, "Cannot calculate a ratio of zero.");
     }
 }
