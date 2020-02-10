@@ -128,12 +128,24 @@ export default class Num {
         return this.num.comparedTo(other);
     }
 
+    public compareTo(other: Num | numeric): number {
+        return this.compare(other);
+    }
+
+    public comparedTo(other: Num | numeric): number {
+        return this.compare(other);
+    }
+
     public equals(other: Num | numeric): boolean {
         if (other instanceof Num) {
             other = other.num;
         }
 
         return this.num.isEqualTo(other);
+    }
+
+    public equalTo(other: Num | numeric): boolean {
+        return this.equals(other);
     }
 
     public equalsTo(other: Num | numeric): boolean {
