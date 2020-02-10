@@ -1,11 +1,31 @@
 import { TestFixture, Test, TestCases, Expect } from "alsatian";
 
 import Num from "src/number";
+import { numeric } from "src/types";
 
 const DEFAULT_AMOUNT = 10;
 
 @TestFixture("Number")
 export default class NumTest {
+    @TestCases(NumTest.invalidNumberExamples)
+    @Test("it disallows invalid number values")
+    public itDisallowsInvalidNumberValues(value: any) {
+        const throwFn = () => new Num(value as numeric);
+        Expect(throwFn).toThrow();
+    }
+
+    public static invalidNumberExamples() {
+        const badValues: any[] = [NaN, Infinity, -Infinity, "bad", "", true, false];
+        const badNumbers: any[] = [
+            '123456789012345678-123456',
+            '---123',
+            '123456789012345678+13456',
+            '-123456789012345678.-13456',
+            '+123456789012345678.+13456',
+        ];
+        return ([] as any[]).concat(badValues, badNumbers).map((val: any) => [val]);
+    }
+
     @TestCases(NumTest.equalityExamples)
     @Test("it equals to another number")
     public itEqualsToAnotherNumber(amount: number, equality: boolean) {
@@ -309,6 +329,173 @@ export default class NumTest {
         Expect(() => num.dividedBy("-0")).toThrow();
     }
 
+    @TestCases(NumTest.allocationExamples)
+    @Test("it allocates an amount")
+    public itAllocatesAmount(amount: number, ratios: number[], results: number[]) {
+        const num = new Num(amount);
+        const allocated = num.allocate(ratios);
+
+        for (const [key, num] of [...allocated].entries()) {
+            const compareTo = new Num(results[key]);
+            Expect(num).toBe(compareTo);
+        }
+    }
+
+    public static allocationExamples() {
+        return [
+            [100, [1, 1, 1], [34, 33, 33]],
+            [101, [1, 1, 1], [34, 34, 33]],
+            [5, [3, 7], [2, 3]],
+            [5, [7, 3], [4, 1]],
+            [5, [7, 3, 0], [4, 1, 0]],
+            [-5, [7, 3], [-3, -2]],
+            [5, [0, 7, 3], [0, 4, 1]],
+            [5, [7, 0, 3], [4, 0, 1]],
+            [5, [0, 0, 1], [0, 0, 5]],
+            [5, [0, 3, 7], [0, 2, 3]],
+            [0, [0, 0, 1], [0, 0, 0]],
+            [2, [1, 1, 1], [1, 1, 0]],
+            [1, [1, 1], [1, 0]],
+            [1, [0.33, 0.66], [0, 1]],
+            [101, [3, 7], [30, 71]],
+            [101, [7, 3], [71, 30]],
+            [500, [1, 1, 1], [167, 167, 166]],
+            [1000, [1, 1, 1], [334, 333, 333]],
+        ];
+    }
+
+    @TestCases(NumTest.allocationNamedExamples)
+    @Test("it allocates named amounts")
+    public itAllocatesNamedAmounts(amount: number, ratios: { [name: string]: number }, results: { [name: string]: number }) {
+        const num = new Num(amount);
+        const allocated = num.allocateNamed(ratios);
+
+        for (const [name, num] of Object.entries(allocated)) {
+            const compareTo = new Num(results[name]);
+            Expect(num).toBe(compareTo);
+        }
+    }
+
+    public static allocationNamedExamples() {
+        return [
+            [101, {'foo': 7, 'bar': 3}, {'foo': 71, 'bar': 30}],
+        ];
+    }
+
+    @TestCases(NumTest.allocationTargetExamples)
+    @Test("it allocates an amount to N targets")
+    public itAllocatesAmountToNTargets(amount: number, target: number, results: number[]) {
+        const num = new Num(amount);
+        const allocated = num.allocateTo(target);
+
+        for (const [key, num] of [...allocated].entries()) {
+            const compareTo = new Num(results[key]);
+            Expect(num).toBe(compareTo);
+        }
+    }
+
+    public static allocationTargetExamples() {
+        return [
+            [15, 2, [8, 7]],
+            [10, 2, [5, 5]],
+            [15, 3, [5, 5, 5]],
+            [10, 3, [4, 3, 3]],
+        ];
+    }
+
+    @TestCases(NumTest.absoluteExamples)
+    @Test("it calculates the absolute amount")
+    public itCalculatesTheAbsoluteAmount(amount: numeric, expected: string) {
+        const num = new Num(amount);
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const absoluteNum = num.absolute();
+        const absNum = num.abs();
+        compare(absoluteNum, absNum);
+
+        Expect(absoluteNum instanceof Num).toBeTruthy();
+        Expect(absoluteNum).toBe(new Num(expected));
+        Expect(absoluteNum.toString()).toBe(expected);
+    }
+
+    public static absoluteExamples() {
+        return [
+            [1, '1'],
+            [0, '0'],
+            [-1, '1'],
+            ['1', '1'],
+            ['0', '0'],
+            ['-1', '1'],
+        ];
+    }
+
+    @TestCases(NumTest.negativeExamples)
+    @Test("it calculates the negative amount")
+    public itCalculatesTheNegativeAmount(amount: numeric, expected: string) {
+        const num = new Num(amount);
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const negativeNum = num.negative();
+        const negateNum = num.negate();
+        const negatedNum = num.negated();
+        compare(negativeNum, negateNum);
+        compare(negativeNum, negatedNum);
+        compare(negateNum, negatedNum);
+
+        Expect(negativeNum instanceof Num).toBeTruthy();
+        Expect(negativeNum).toBe(new Num(expected));
+        Expect(negativeNum.toString()).toBe(expected);
+    }
+
+    public static negativeExamples() {
+        return [
+            [1, '-1'],
+            [-1, '1'],
+            [0, '-0'],
+            [-0, '0'],
+            ['1', '-1'],
+            ['-1', '1'],
+            ['0', '-0'],
+            ['-0', '0'],
+        ];
+    }
+
+    @TestCases(NumTest.modExamples)
+    @Test("it calculates the modulus of an amount")
+    public itCalculatesTheModulusOfAnAmount(amount: number, divisor: number, expected: string) {
+        const num = new Num(amount);
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const modNum = num.mod(divisor);
+        const moduloNum = num.modulo(divisor);
+        compare(modNum, moduloNum);
+
+        Expect(modNum instanceof Num).toBeTruthy();
+        Expect(modNum).toBe(new Num(expected));
+        Expect(modNum.toString()).toBe(expected);
+    }
+
+    public static modExamples() {
+        return [
+            [11, 5, '1'],
+            [9, 3, '0'],
+            [1006, 10, '6'],
+            [1007, 10, '7'],
+        ];
+    }
+
     @TestCases(NumTest.numberExamples)
     @Test("it has attributes")
     public itHasAttributes(num: string | number, decimal: boolean, half: boolean, even: boolean, negative: boolean, integerPart: string, fractionalPart: string) {
@@ -400,25 +587,6 @@ export default class NumTest {
         }
 
         return finalExampleList.concat(complexExamples);
-    }
-
-    @TestCases(NumTest.invalidNumberExamples)
-    @Test("it fails parsing invalid numbers")
-    public itFailsParsingInvalidNumbers(num: string) {
-        const throwFn = () => new Num(num);
-
-        Expect(throwFn).toThrow();
-    }
-
-    public static invalidNumberExamples() {
-        return [
-            [''],
-            ['123456789012345678-123456'],
-            ['---123'],
-            ['123456789012345678+13456'],
-            ['-123456789012345678.-13456'],
-            ['+123456789012345678.+13456'],
-        ];
     }
 
     @TestCases(NumTest.shiftExamples)

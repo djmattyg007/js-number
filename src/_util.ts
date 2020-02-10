@@ -1,3 +1,6 @@
+import BigNumber from "bignumber.js";
+import { numeric } from "./types";
+
 export function arraySum(arr: number[]): number {
     let sum = 0;
 
@@ -8,32 +11,26 @@ export function arraySum(arr: number[]): number {
     return sum;
 };
 
-export function mapKeysWithSearch<T>(map: Map<number, T>, search: T, strict: boolean = false): number[] {
-    const mapKeys = [];
-
+export function searchMapForBigNumber(map: Map<number, BigNumber>, search: numeric): number {
     for (const [key, val] of map.entries()) {
-        const check = strict === true ? val === search : val == search;
-        if (check === true) {
-            mapKeys.push(key);
+        if (val.isEqualTo(search)) {
+            return key;
         }
     }
 
-    return mapKeys;
+    throw new Error("Map search value not found.");
 };
 
-interface GenericObj<T> {
+interface GenericObj<T = BigNumber> {
     [key: string]: T;
 }
 
-export function objectKeysWithSearch<T>(obj: GenericObj<T>, search: T, strict: boolean = false): Array<keyof GenericObj<T>> {
-    const objKeys = [];
-
+export function searchObjectForBigNumber(obj: GenericObj<BigNumber>, search: numeric): keyof GenericObj<BigNumber> {
     for (const [key, val] of Object.entries(obj)) {
-        const check = strict === true ? val === search : val == search;
-        if (check === true) {
-            objKeys.push(key);
+        if (val.isEqualTo(search)) {
+            return key;
         }
     }
 
-    return objKeys;
+    throw new Error("Object search value not found.");
 };

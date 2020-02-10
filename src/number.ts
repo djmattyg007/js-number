@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { RoundingMode } from "./rounding";
 import { numeric } from "./types";
-import { arraySum, mapKeysWithSearch, objectKeysWithSearch } from "./_util";
+import { arraySum, searchMapForBigNumber, searchObjectForBigNumber } from "./_util";
 
 interface NamedRatios {
     [name: string]: number;
@@ -319,6 +319,10 @@ export default class Num {
         return new Num(this.num.abs());
     }
 
+    public abs(): Num {
+        return this.absolute();
+    }
+
     public round(roundingMode: RoundingMode): Num {
         return new Num(this._round(roundingMode));
     }
@@ -366,7 +370,7 @@ export default class Num {
         };
 
         while (remainder.isZero() === false) {
-            const index = fractionsMap.size > 0 ? mapKeysWithSearch(fractionsMap, BigNumber.max(...fractionsMap.values()))[0] : 0;
+            const index = fractionsMap.size > 0 ? searchMapForBigNumber(fractionsMap, BigNumber.max(...fractionsMap.values())) : 0;
             const match = results.get(index) as BigNumber;
             results.set(index, match.plus(1));
             remainder = remainder.minus(1);
@@ -425,7 +429,7 @@ export default class Num {
 
         while (remainder.isZero() === false) {
             // TODO: I don't know how this is supposed to handle the case where Object.keys(fractions).length === 0 for named allocations
-            const index = Object.keys(fractions).length > 0 ? objectKeysWithSearch(fractions, BigNumber.max(...Object.values(fractions)))[0] : 0;
+            const index = Object.keys(fractions).length > 0 ? searchObjectForBigNumber(fractions, BigNumber.max(...Object.values(fractions))) : 0;
             const match = results[index];
             results[index] = match.plus(1);
             remainder = remainder.minus(1);
@@ -467,12 +471,28 @@ export default class Num {
         return amount.multipliedBy(ratio).dividedBy(total).integerValue(BigNumber.ROUND_FLOOR);
     }
 
+    public negative(): Num {
+        return new Num(this.num.negated());
+    }
+
+    public negate(): Num {
+        return this.negative();
+    }
+
+    public negated(): Num {
+        return this.negative();
+    }
+
     public mod(divisor: Num | numeric): Num {
         if (divisor instanceof Num) {
             divisor = divisor.num;
         }
 
         return new Num(this.num.mod(divisor));
+    }
+
+    public modulo(divisor: Num | numeric): Num {
+        return this.mod(divisor);
     }
 
     public ratioOf(other: Num): Num {
