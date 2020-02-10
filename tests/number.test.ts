@@ -516,6 +516,7 @@ export default class NumTest {
         Expect(percentageNum instanceof Num).toBeTruthy();
         Expect(percentageNum).toBe(new Num(expected));
         Expect(percentageNum.toString()).toBe(expected);
+        Expect(percentageNum).toBeLessThanOrEqual(num);
     }
 
     public static percentageExamples() {
@@ -550,6 +551,7 @@ export default class NumTest {
         Expect(percentageNum instanceof Num).toBeTruthy();
         Expect(percentageNum).toBe(new Num(expected));
         Expect(percentageNum.toString()).toBe(expected);
+        Expect(percentageNum).toBeLessThanOrEqual(num);
     }
 
     public static subtractPercentageExamples() {
