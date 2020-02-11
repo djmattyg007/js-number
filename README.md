@@ -50,6 +50,7 @@ console.log(String(fiveFromNumber.add(5))); // outputs "10"
 console.log(String(fiveFromNumber.add("5"))); // outputs "10"
 console.log(String(fiveFromNumber.add(fiveFromString))); // outputs "10"
 console.log(String(fiveFromString.add(fiveBigNum))); // outputs "10"
+console.log(fiveFromString.add(5).subtract(5).equals(fiveFromString)) // outputs true
 
 console.log(fiveBigNum.isEqualTo(fiveFromString.num)); // outputs true
 ```
