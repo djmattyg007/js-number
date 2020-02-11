@@ -21,6 +21,8 @@ export default class Num {
     public readonly integerPart: string;
     public readonly fractionalPart: string;
 
+    public readonly isZero: boolean;
+
     public constructor(num: Num | numeric) {
         if (num instanceof Num) {
             this.num = num.num;
@@ -33,14 +35,18 @@ export default class Num {
             throw new Error("Invalid number supplied.");
         }
 
-        const numStr = this.num.toFixed();
-        const numStrParts = numStr.split(".");
-        if (this.num.isZero() && this.num.isNegative()) {
-            this.integerPart = "-0";
-        } else {
-            this.integerPart = numStrParts[0];
+        this.isZero = this.num.isZero();
+        if (this.isZero === true && this.num.isNegative() === true) {
+            // Normalise to "positive" zero, to avoid weirdness.
+            // JS numbers (which BigNumber is emulating) can always be positive or
+            // negative zero because they're always technically floating-point numbers.
+            this.num = new BigNumber(0);
         }
 
+        const numStr = this.num.toFixed();
+        const numStrParts = numStr.split(".");
+
+        this.integerPart = numStrParts[0];
         if (numStrParts.length === 2) {
             this.fractionalPart = numStrParts[1];
         } else {
@@ -59,11 +65,11 @@ export default class Num {
     }
 
     public toString(): string {
-        if (this.num.isZero() && this.num.isNegative()) {
-            return "-0";
+        if (this.fractionalPart.length > 0) {
+            return `${this.integerPart}.${this.fractionalPart}`;
+        } else {
+            return this.integerPart;
         }
-
-        return this.num.toFixed();
     }
 
     public toJSON(): string {
@@ -101,18 +107,22 @@ export default class Num {
     }
 
     public get isPositive(): boolean {
+        if (this.isZero === true) {
+            return false;
+        }
+
         return this.num.isPositive();
     }
 
     public get isNegative(): boolean {
+        if (this.isZero === true) {
+            return false;
+        }
+
         return this.num.isNegative();
     }
 
-    public get isZero(): boolean {
-        return this.num.isZero();
-    }
-
-    public getIntegerRoundingMultiplier(): 1 | -1 {
+    private getIntegerRoundingMultiplier(): 1 | -1 {
         if (this.num.isNegative() === true) {
             return -1;
         }
@@ -277,7 +287,8 @@ export default class Num {
     }
 
     public divide(divisor: numeric): Num {
-        if ((new BigNumber(divisor)).isZero() === true) {
+        const bigDivisor = Num.convertToBigNum(divisor);
+        if (bigDivisor.isZero() === true) {
             throw new Error("Cannot divide by zero.");
         }
 
@@ -335,8 +346,12 @@ export default class Num {
         return this.absolute();
     }
 
-    public round(roundingMode: RoundingMode): Num {
+    public round(roundingMode: RoundingMode = RoundingMode.ROUND_HALF_UP): Num {
         return new Num(this._round(roundingMode));
+    }
+
+    public roundToDecimalPlaces(places: number, roundingMode: RoundingMode = RoundingMode.ROUND_HALF_UP): Num {
+        return new Num(this._decimalPlaces(places, roundingMode));
     }
 
     public *allocate(ratios: number[]): Generator<Num> {
@@ -606,22 +621,29 @@ export default class Num {
 
     private _round(roundingMode: RoundingMode): BigNumber {
         switch (roundingMode) {
+            case RoundingMode.ROUND_UP:
+                return this.num.integerValue(BigNumber.ROUND_CEIL);
+            case RoundingMode.ROUND_DOWN:
+                return this.num.integerValue(BigNumber.ROUND_FLOOR);
+            case RoundingMode.ROUND_TRUNCATE:
+                return new BigNumber(this.integerPart);
+        }
+
+        if (this.isHalf === false) {
+            return this.num.integerValue(BigNumber.ROUND_HALF_UP);
+        }
+
+        switch (roundingMode) {
             case RoundingMode.ROUND_HALF_UP:
                 return this.num.integerValue(BigNumber.ROUND_HALF_UP);
             case RoundingMode.ROUND_HALF_DOWN:
                 return this.num.integerValue(BigNumber.ROUND_HALF_DOWN);
             case RoundingMode.ROUND_HALF_EVEN:
                 return this.num.integerValue(BigNumber.ROUND_HALF_EVEN);
-            case RoundingMode.ROUND_UP:
-                return this.num.integerValue(BigNumber.ROUND_CEIL);
-            case RoundingMode.ROUND_DOWN:
-                return this.num.integerValue(BigNumber.ROUND_FLOOR);
             case RoundingMode.ROUND_HALF_POSITIVE_INFINITY:
                 return this.num.integerValue(BigNumber.ROUND_HALF_CEIL);
             case RoundingMode.ROUND_HALF_NEGATIVE_INFINITY:
                 return this.num.integerValue(BigNumber.ROUND_HALF_FLOOR);
-            case RoundingMode.ROUND_TRUNCATE:
-                return new BigNumber(this.integerPart);
         }
 
         if (roundingMode === RoundingMode.ROUND_HALF_ODD) {
@@ -630,6 +652,58 @@ export default class Num {
                 return truncated;
             }
             return truncated.plus(this.getIntegerRoundingMultiplier());
+        }
+
+        throw new Error("Unrecognised rounding mode.");
+    }
+
+    private _decimalPlaces(places: number, roundingMode: RoundingMode): BigNumber {
+        if (Number.isInteger(places) === false || places < 0) {
+            throw new Error("Number of decimal places must be a positive integer.");
+        }
+
+        switch (roundingMode) {
+            case RoundingMode.ROUND_HALF_UP:
+                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_UP);
+            case RoundingMode.ROUND_HALF_DOWN:
+                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_DOWN);
+            case RoundingMode.ROUND_HALF_EVEN:
+                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_EVEN);
+            case RoundingMode.ROUND_UP:
+                return this.num.decimalPlaces(places, BigNumber.ROUND_CEIL);
+            case RoundingMode.ROUND_DOWN:
+                return this.num.decimalPlaces(places, BigNumber.ROUND_FLOOR);
+            case RoundingMode.ROUND_HALF_POSITIVE_INFINITY:
+                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_CEIL);
+            case RoundingMode.ROUND_HALF_NEGATIVE_INFINITY:
+                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_FLOOR);
+            case RoundingMode.ROUND_TRUNCATE:
+                if (this.fractionalPart.length > 0) {
+                    return new BigNumber(`${this.integerPart}.${this.fractionalPart.substr(0, places)}`);
+                } else {
+                    return new BigNumber(this.integerPart);
+                }
+        }
+
+        if (roundingMode === RoundingMode.ROUND_HALF_ODD) {
+            if (places === 0) {
+                return this._round(RoundingMode.ROUND_HALF_ODD);
+            }
+
+            const rounded = this.num.toFixed(places + 1, BigNumber.ROUND_HALF_UP);
+            const lastDigit = parseInt(rounded.slice(-1));
+            const secondLastDigit = parseInt(rounded.slice(-2, -1));
+            if (lastDigit > 5) {
+                return new BigNumber(rounded.slice(0, -2) + (secondLastDigit + 1));
+            } else if (lastDigit < 5) {
+                return new BigNumber(rounded.slice(0, -1));
+            } else {
+                if (secondLastDigit % 2 === 0) {
+                    return new BigNumber(rounded.slice(0, -2) + (secondLastDigit + 1));
+                } else {
+                    return new BigNumber(rounded.slice(0, -1));
+                }
+            }
         }
 
         throw new Error("Unrecognised rounding mode.");

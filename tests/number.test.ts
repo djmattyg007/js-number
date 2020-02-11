@@ -2,8 +2,10 @@
 import { TestFixture, Test, TestCases, Expect } from "alsatian";
 
 import Num from "src/number";
+import { RoundingMode } from "src/rounding";
 import { numeric } from "src/types";
 
+import { roundExamples, roundToDecimalPlacesExamples } from "fixtures/rounding";
 import { sumExamples, minExamples, maxExamples, avgExamples } from "fixtures/aggregate";
 
 const DEFAULT_AMOUNT = 10;
@@ -213,11 +215,7 @@ export default class NumTest {
         const multipliedNum = num.multiply(0);
 
         Expect(multipliedNum instanceof Num).toBeTruthy();
-        if (num.isPositive) {
-            Expect(multipliedNum.toString()).toBe("0");
-        } else {
-            Expect(multipliedNum.toString()).toBe("-0");
-        }
+        Expect(multipliedNum.toString()).toBe("0");
         Expect(multipliedNum).toEqual(new Num(0));
     }
 
@@ -234,7 +232,7 @@ export default class NumTest {
     }
 
     public static constantNumberExamples() {
-        const numbers = [1, 0.1, 0.5, 2, 10, 10.5, 100, 0, -0.1, -0.5, -1, -2, -10, -15.8, -100];
+        const numbers = [1, 0.1, 0.5, 2, 10, 10.5, 100, 0, -0, -0.1, -0.5, -1, -2, -10, -15.8, -100];
         return numbers.map(num => [num]);
     }
 
@@ -310,12 +308,7 @@ export default class NumTest {
 
         Expect(dividedNum instanceof Num).toBeTruthy();
         Expect(dividedNum).toBe(num);
-
-        if (dividedNum.isPositive === true) {
-            Expect(dividedNum.toString()).toBe("0");
-        } else {
-            Expect(dividedNum.toString()).toBe("-0");
-        }
+        Expect(dividedNum.toString()).toBe("0");
     }
 
     @Test("it disallows divide-by-zero")
@@ -330,6 +323,114 @@ export default class NumTest {
         Expect(() => num.dividedBy(-0)).toThrow();
         Expect(() => num.divide("-0")).toThrow();
         Expect(() => num.dividedBy("-0")).toThrow();
+    }
+
+    @TestCases(NumTest.ceilExamples)
+    @Test("it rounds to the nearest integer at or above the current number")
+    public itCeils(amount: numeric, expected: string) {
+        const num = new Num(amount);
+        const ceilNum = num.ceil();
+
+        Expect(ceilNum instanceof Num).toBeTruthy();
+        Expect(ceilNum).toBe(new Num(expected));
+        Expect(ceilNum.toString()).toBe(expected);
+    }
+
+    public static *ceilExamples() {
+        const examples = [
+            [100, "100"],
+            [99.999, "100"],
+            [100.0001, "101"],
+            ["100.0001", "101"],
+            [100.1, "101"],
+            [0.1, "1"],
+            [0.4, "1"],
+            [0.5, "1"],
+            [0.6, "1"],
+            [1.00001, "2"],
+            [1.01, "2"],
+            [1.999, "2"],
+            [2.999, "3"],
+            [0, "0"],
+            [-0.1, "0"],
+            [-0.5, "0"],
+            [-0.9, "0"],
+            [-1, "-1"],
+            [-1.0, "-1"],
+            [-1.9, "-1"],
+            [-2, "-2"],
+            [-2.3, "-2"],
+        ];
+
+        for (const [amount, expected] of examples) {
+            yield [amount, expected];
+            yield [String(amount), expected];
+        }
+    }
+
+    @TestCases(NumTest.floorExamples)
+    @Test("it rounds to the nearest integer at or below the current number")
+    public itFloors(amount: numeric, expected: string) {
+        const num = new Num(amount);
+        const floorNum = num.floor();
+
+        Expect(floorNum instanceof Num).toBeTruthy();
+        Expect(floorNum).toBe(new Num(expected));
+        Expect(floorNum.toString()).toBe(expected);
+    }
+
+    public static *floorExamples() {
+        const examples = [
+            [100, "100"],
+            [99.999, "99"],
+            [100.0001, "100"],
+            ["100.0001", "100"],
+            [100.1, "100"],
+            [0.1, "0"],
+            [0.4, "0"],
+            [0.5, "0"],
+            [0.6, "0"],
+            [1.00001, "1"],
+            [1.01, "1"],
+            [1.999, "1"],
+            [2.999, "2"],
+            [0, "0"],
+            [-0.1, "-1"],
+            [-0.5, "-1"],
+            [-0.9, "-1"],
+            [-1, "-1"],
+            [-1.0, "-1"],
+            [-1.9, "-2"],
+            [-2, "-2"],
+            [-2.3, "-3"],
+        ];
+
+        for (const [amount, expected] of examples) {
+            yield [amount, expected];
+            yield [String(amount), expected];
+        }
+    }
+
+    @TestCases(roundExamples)
+    @Test("it rounds numbers to integers")
+    public itRoundsToIntegers(amount: numeric, roundingMode: RoundingMode, expected: string) {
+        const num = new Num(amount);
+        const roundedNum = num.round(roundingMode);
+
+        Expect(roundedNum instanceof Num).toBeTruthy();
+        Expect(roundedNum).toBe(new Num(expected));
+        Expect(roundedNum.toString()).toBe(expected);
+    }
+
+    @TestCases(roundToDecimalPlacesExamples)
+    @Test("it rounds to N number of decimal places")
+    public itRoundsToNDecimalPlaces(amount: string, places: number, roundingMode: RoundingMode, expected: string) {
+        const num = new Num(amount);
+        const roundedNum = num.roundToDecimalPlaces(places, roundingMode);
+
+        Expect(roundedNum instanceof Num).toBeTruthy();
+        Expect(roundedNum).toBe(new Num(expected));
+        Expect(roundedNum.toString()).toBe(expected);
     }
 
     @TestCases(NumTest.allocationExamples)
@@ -462,11 +563,11 @@ export default class NumTest {
         return [
             [1, '-1'],
             [-1, '1'],
-            [0, '-0'],
+            [0, '0'],
             [-0, '0'],
             ['1', '-1'],
             ['-1', '1'],
-            ['0', '-0'],
+            ['0', '0'],
             ['-0', '0'],
         ];
     }
@@ -592,69 +693,85 @@ export default class NumTest {
 
     @TestCases(NumTest.numberExamples)
     @Test("it has attributes")
-    public itHasAttributes(num: string | number, decimal: boolean, half: boolean, even: boolean, negative: boolean, integerPart: string, fractionalPart: string) {
+    public itHasAttributes(num: string | number, integer: boolean, decimal: boolean, half: boolean, even: boolean, odd: boolean, zero: boolean, positive: boolean, negative: boolean, integerPart: string, fractionalPart: string) {
         const numObj = new Num(num);
 
-        Expect(numObj.isInteger).toBe(!decimal);
+        Expect(numObj.isInteger).toBe(integer);
         Expect(numObj.isDecimal).toBe(decimal);
         Expect(numObj.isHalf).toBe(half);
         Expect(numObj.isEven).toBe(even);
-        Expect(numObj.isPositive).toBe(!negative);
+        Expect(numObj.isOdd).toBe(odd);
+        Expect(numObj.isZero).toBe(zero);
+        Expect(numObj.isPositive).toBe(positive);
         Expect(numObj.isNegative).toBe(negative);
         Expect(numObj.integerPart).toBe(integerPart);
         Expect(numObj.fractionalPart).toBe(fractionalPart);
-        Expect(numObj.getIntegerRoundingMultiplier()).toBe(negative ? -1 : 1);
     }
 
     public static numberExamples() {
         const maxIntStr = String(Number.MAX_SAFE_INTEGER);
         const minIntStr = String(Number.MIN_SAFE_INTEGER);
 
+        /**
+         *   n   int   dec   half   even   odd   zero   pos   neg   intPart fracPart
+         */
         const simpleExamples = [
-            [0, false, false, true, false, '0', ''],
-            ['0', false, false, true, false, '0', ''],
-            ['000', false, false, true, false, '0', ''],
-            ['0.00', false, false, true, false, '0', ''],
-            ['0.5', true, true, true, false, '0', '5'],
-            ['0.500', true, true, true, false, '0', '5'],
-            ['005', false, false, false, false, '5', ''],
-            ['-0', false, false, true, true, '-0', ''],
-            ['-0.5', true, true, true, true, '-0', '5'],
-            ['3', false, false, false, false, '3', ''],
-            ['3.00', false, false, false, false, '3', ''],
-            ['3.5', true, true, false, false, '3', '5'],
-            ['3.500', true, true, false, false, '3', '5'],
-            ['-3', false, false, false, true, '-3', ''],
-            ['-3.5', true, true, false, true, '-3', '5'],
-            ['10', false, false, true, false, '10', ''],
-            ['10.00', false, false, true, false, '10', ''],
-            ['10.5', true, true, true, false, '10', '5'],
-            ['10.500', true, true, true, false, '10', '5'],
-            ['10.9', true, false, true, false, '10', '9'],
-            ['-10', false, false, true, true, '-10', ''],
-            ['-0', false, false, true, true, '-0', ''],
-            ['-10.5', true, true, true, true, '-10', '5'],
-            ['-.5', true, true, true, true, '-0', '5'],
-            ['.5', true, true, true, false, '0', '5'],
+            [0, true, false, false, true, false, true, false, false, '0', ''],
+            [-0, true, false, false, true, false, true, false, false, '0', ''],
+            ['0', true, false, false, true, false, true, false, false, '0', ''],
+            ['-0', true, false, false, true, false, true, false, false, '0', ''],
+            ['000', true, false, false, true, false, true, false, false, '0', ''],
+            ['0.00', true, false, false, true, false, true, false, false, '0', ''],
+            ['0.5', false, true, true, true, false, false, true, false, '0', '5'],
+            ['0.500', false, true, true, true, false, false, true, false, '0', '5'],
+            ['005', true, false, false, false, true, false, true, false, '5', ''],
+            ['-0.5', false, true, true, true, false, false, false, true, '-0', '5'],
+            ['3', true, false, false, false, true, false, true, false, '3', ''],
+            ['3.00', true, false, false, false, true, false, true, false, '3', ''],
+            ['3.5', false, true, true, false, true, false, true, false, '3', '5'],
+            ['3.500', false, true, true, false, true, false, true, false, '3', '5'],
+            ['-3', true, false, false, false, true, false, false, true, '-3', ''],
+            ['-3.0', true, false, false, false, true, false, false, true, '-3', ''],
+            ['-3.5', false, true, true, false, true, false, false, true, '-3', '5'],
+            ['10', true, false, false, true, false, false, true, false, '10', ''],
+            ['10.00', true, false, false, true, false, false, true, false, '10', ''],
+            ['10.5', false, true, true, true, false, false, true, false, '10', '5'],
+            ['10.500', false, true, true, true, false, false, true, false, '10', '5'],
+            ['10.9', false, true, false, true, false, false, true, false, '10', '9'],
+            ['-10', true, false, false, true, false, false, false, true, '-10', ''],
+            ['-10.5', false, true, true, true, false, false, false, true, '-10', '5'],
+            ['-.5', false, true, true, true, false, false, false, true, '-0', '5'],
+            ['.5', false, true, true, true, false, false, true, false, '0', '5'],
         ];
 
+        /**
+         *   n   int   dec   half   even   odd   zero   pos   neg   intPart fracPart
+         */
         const complexExamples = [
-            ['+123456789', false, false, false, false, '123456789', ''],
-            ['+123456789012345678.13456', true, false, true, false, '123456789012345678', '13456'],
-            [maxIntStr, false, false, false, false, maxIntStr, ''],
-            [minIntStr, false, false, false, true, minIntStr, ''],
+            ['+123456789', true, false, false, false, true, false, true, false, '123456789', ''],
+            ['+123456789012345678.13456', false, true, false, true, false, false, true, false, '123456789012345678', '13456'],
+            [maxIntStr, true, false, false, false, true, false, true, false, maxIntStr, ''],
+            [minIntStr, true, false, false, false, true, false, false, true, minIntStr, ''],
             [
                 maxIntStr + maxIntStr + maxIntStr,
+                true,
                 false,
                 false,
                 false,
+                true,
+                false,
+                true,
                 false,
                 maxIntStr + maxIntStr + maxIntStr,
                 '',
             ],
             [
                 minIntStr + maxIntStr + maxIntStr,
+                true,
                 false,
+                false,
+                false,
+                true,
                 false,
                 false,
                 true,
@@ -663,9 +780,13 @@ export default class NumTest {
             ],
             [
                 maxIntStr.substr(0, maxIntStr.length - 1) + "0".repeat(maxIntStr.length - 1) + maxIntStr,
+                true,
                 false,
                 false,
                 false,
+                true,
+                false,
+                true,
                 false,
                 maxIntStr.substr(0, maxIntStr.length - 1) + "0".repeat(maxIntStr.length - 1) + maxIntStr,
                 '',
