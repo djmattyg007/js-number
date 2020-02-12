@@ -64,11 +64,7 @@ export default class Num {
         }
     }
 
-    public toString(decimalPlaces: number = -1): string {
-        if (decimalPlaces >= 0) {
-            return this.num.toFixed(decimalPlaces);
-        }
-
+    public toString(): string {
         if (this.fractionalPart.length > 0) {
             return `${this.integerPart}.${this.fractionalPart}`;
         } else {
@@ -356,6 +352,10 @@ export default class Num {
 
     public roundToDecimalPlaces(places: number, roundingMode: RoundingMode = RoundingMode.ROUND_HALF_UP): Num {
         return new Num(this._decimalPlaces(places, roundingMode));
+    }
+
+    public toRoundedString(decimalPlaces: number, roundingMode: RoundingMode = RoundingMode.ROUND_HALF_UP): string {
+        return this._decimalPlaces(decimalPlaces, roundingMode).toFixed(decimalPlaces);
     }
 
     public *allocate(ratios: number[]): Generator<Num> {
