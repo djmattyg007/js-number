@@ -1,7 +1,7 @@
 {
     "name": "@cashmoney/number",
     "description": "Wrapper around bignumber.js providing string-only representation of arbitrary-precision decimal numbers.",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "license": "MIT",
     "author": "Matthew Gamble <git@matthewgamble.net>",
     "dependencies": {
