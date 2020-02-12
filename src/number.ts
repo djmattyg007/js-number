@@ -64,7 +64,11 @@ export default class Num {
         }
     }
 
-    public toString(): string {
+    public toString(decimalPlaces: number = -1): string {
+        if (decimalPlaces >= 0) {
+            return this.num.toFixed(decimalPlaces);
+        }
+
         if (this.fractionalPart.length > 0) {
             return `${this.integerPart}.${this.fractionalPart}`;
         } else {
