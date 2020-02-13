@@ -389,7 +389,7 @@ export default class Num {
             remainder = remainder.minus(share);
         }
 
-        if (remainder.isZero() === true) {
+        if (remainder.isGreaterThan(0) === false) {
             return results.values();
         }
 
@@ -400,7 +400,7 @@ export default class Num {
             fractionsMap.set(idx, fraction);
         };
 
-        while (remainder.isZero() === false) {
+        while (remainder.isGreaterThan(0) === true) {
             const index = fractionsMap.size > 0 ? searchMapForBigNumber(fractionsMap, BigNumber.max(...fractionsMap.values())) : 0;
             const match = results.get(index) as BigNumber;
             results.set(index, match.plus(1));
@@ -447,7 +447,7 @@ export default class Num {
             remainder = remainder.minus(share);
         }
 
-        if (remainder.isZero() === true) {
+        if (remainder.isGreaterThan(0) === false) {
             return results;
         }
 
@@ -458,7 +458,7 @@ export default class Num {
             fractions[key] = fraction;
         }
 
-        while (remainder.isZero() === false) {
+        while (remainder.isGreaterThan(0) === true) {
             // TODO: I don't know how this is supposed to handle the case where Object.keys(fractions).length === 0 for named allocations
             const index = Object.keys(fractions).length > 0 ? searchObjectForBigNumber(fractions, BigNumber.max(...Object.values(fractions))) : 0;
             const match = results[index];
