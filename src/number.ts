@@ -114,12 +114,28 @@ export default class Num {
         return this.num.isPositive();
     }
 
+    public get isPositiveOrZero(): boolean {
+        if (this.isZero === true) {
+            return true;
+        }
+
+        return this.num.isPositive();
+    }
+
     public get isNegative(): boolean {
         if (this.isZero === true) {
             return false;
         }
 
         return this.num.isNegative();
+    }
+
+    public get isNegativeOrZero(): boolean {
+        if (this.isZero === true) {
+            return true;
+        }
+
+        return this.num.isPositive();
     }
 
     private getIntegerRoundingMultiplier(): 1 | -1 {
