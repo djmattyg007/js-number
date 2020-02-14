@@ -290,28 +290,32 @@ export default class Num {
         return Num.subtract(amount, subtrahends);
     }
 
-    public multiply(multiplier: numeric): Num {
+    public multiply(multiplier: Num | numeric): Num {
+        if (multiplier instanceof Num) {
+            multiplier = multiplier.num;
+        }
+
         return new Num(this.num.multipliedBy(multiplier));
     }
 
-    public times(multiplier: numeric): Num {
+    public times(multiplier: Num | numeric): Num {
         return this.multiply(multiplier);
     }
 
-    public multipliedBy(multiplier: numeric): Num {
+    public multipliedBy(multiplier: Num | numeric): Num {
         return this.multiply(multiplier);
     }
 
-    public divide(divisor: numeric): Num {
+    public divide(divisor: Num | numeric): Num {
         const bigDivisor = Num.convertToBigNum(divisor);
         if (bigDivisor.isZero() === true) {
             throw new Error("Cannot divide by zero.");
         }
 
-        return new Num(this.num.dividedBy(divisor));
+        return new Num(this.num.dividedBy(bigDivisor));
     }
 
-    public dividedBy(divisor: numeric): Num {
+    public dividedBy(divisor: Num | numeric): Num {
         return this.divide(divisor);
     }
 
