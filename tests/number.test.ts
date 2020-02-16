@@ -503,6 +503,8 @@ export default class NumTest {
 
     public static allocationTargetExamples() {
         return [
+            [0, 2, [0, 0]],
+            [0, 3, [0, 0, 0]],
             [15, 2, [8, 7]],
             [10, 2, [5, 5]],
             [15, 3, [5, 5, 5]],
