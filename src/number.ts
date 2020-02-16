@@ -319,6 +319,31 @@ export default class Num {
         return this.divide(divisor);
     }
 
+    public div(divisor: Num | numeric): Num {
+        return this.divide(divisor);
+    }
+
+    public intDivide(divisor: Num | numeric): Num {
+        const bigDivisor = Num.convertToBigNum(divisor);
+        if (bigDivisor.isZero() === true) {
+            throw new Error("Cannot divide by zero.");
+        }
+
+        return new Num(this.num.dividedToIntegerBy(bigDivisor));
+    }
+
+    public dividedToIntegerBy(divisor: Num | numeric): Num {
+        return this.intDivide(divisor);
+    }
+
+    public idiv(divisor: Num | numeric): Num {
+        return this.intDivide(divisor);
+    }
+
+    public intdiv(divisor: Num | numeric): Num {
+        return this.intDivide(divisor);
+    }
+
     public percentage(percent: number): Num {
         if (percent < 0 || percent > 100) {
             throw new RangeError("Percentage values must be between 0 and 100.");

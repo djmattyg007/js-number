@@ -247,15 +247,15 @@ export default class NumTest {
         };
 
         const result1 = num.divide(divisor);
-        const result2 = num.dividedBy(divisor);
-        compare(result1, result2);
-
         Expect(result1 instanceof Num).toBeTruthy();
         Expect(result1).toBe(new Num(expected));
         Expect(result1.toString()).toBe(expected);
-        Expect(result2 instanceof Num).toBeTruthy();
-        Expect(result2).toBe(new Num(expected));
-        Expect(result2.toString()).toBe(expected);
+
+        const result2 = num.dividedBy(divisor);
+        const result3 = num.div(divisor);
+        compare(result1, result2);
+        compare(result1, result3);
+        compare(result2, result3);
     }
 
     public static divisionExamples() {
@@ -279,6 +279,65 @@ export default class NumTest {
             [-4, 0.5, '-8'],
             [-24, 8, '-3'],
             [-20, 8, '-2.5'],
+        ];
+    }
+
+    @TestCases(NumTest.integerDivisionExamples)
+    @Test("it performs integer division")
+    public itPerformsIntegerDivision(amount: number, divisor: number, expected: string) {
+        const num = new Num(amount);
+
+        const compare = (num1: Num, num2: Num): void => {
+            Expect(num1).toBe(num2);
+            Expect(num2).toBe(num1);
+        };
+
+        const result1 = num.intDivide(divisor);
+        Expect(result1 instanceof Num).toBeTruthy();
+        Expect(result1).toBe(new Num(expected));
+        Expect(result1.toString()).toBe(expected);
+        Expect(result1).toBeAnInteger();
+        Expect(result1).not.toBeADecimal();
+
+        const result2 = num.dividedToIntegerBy(divisor);
+        const result3 = num.idiv(divisor);
+        const result4 = num.intdiv(divisor);
+        compare(result1, result2);
+        compare(result1, result3);
+        compare(result1, result4);
+        compare(result2, result3);
+        compare(result2, result4);
+        compare(result3, result4);
+    }
+
+    public static integerDivisionExamples() {
+        return [
+            [1, 1, "1"],
+            [1, 2, "0"],
+            [1, 3, "0"],
+            [2, 2, "1"],
+            [2, 1, "2"],
+            [2, 4, "0"],
+            [4, 2, "2"],
+            [4, 3, "1"],
+            [4, 0.5, "8"],
+            [4.2, 0.5, "8"],
+            [5, 0.5, "10"],
+            [24, 9, "2"],
+            ["20", 8, "2"],
+            [-1, 1, "-1"],
+            [-1, 2, "0"],
+            [-1, 3, "0"],
+            [-2, 2, "-1"],
+            [-2, 1, "-2"],
+            [-2, 4, "0"],
+            [-4, 2, "-2"],
+            [-4, 3, "-1"],
+            [-4, 0.5, "-8"],
+            [-4.2, 0.5, "-8"],
+            [-5, 0.5, "-10"],
+            [-24, 9, "-2"],
+            [-20, 8, "-2"],
         ];
     }
 
