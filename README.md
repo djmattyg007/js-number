@@ -5,7 +5,7 @@ designed to provide a string-only representation of arbitrary-precision decimal 
 niceties on top of what is normally available with BigNumber, with the aim of being difficult to misuse. The ideal
 situation is to replace all usages of the default JavaScript ``Number`` type with the ``Num`` class found in this package.
 
-This was born out of the need to introduce "big number" support to [CashMoney](https://github.com/djmattyg007/js-cashmoney"),
+This was born out of the need to introduce "big number" support to [CashMoney](https://github.com/cashmoneyjs/cashmoney"),
 my port of [MoneyPHP](https://github.com/moneyphp/money) to JavaScript. Originally, the number class was rather limited,
 and didn't support arithmetic operations on arbitrary-precision numbers. This package is designed to replace that entirely,
 bringing it into a public interface.

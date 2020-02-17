@@ -27,10 +27,10 @@
         "tsconfig.json"
     ],
     "sideEffects": false,
-    "homepage": "https://github.com/djmattyg007/js-number",
+    "homepage": "https://github.com/cashmoneyjs/number",
     "repository": {
         "type": "git",
-        "url": "https://github.com/djmattyg007/js-number.git"
+        "url": "https://github.com/cashmoneyjs/number.git"
     },
     "keywords": [
         "number",
