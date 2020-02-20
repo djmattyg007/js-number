@@ -16,6 +16,8 @@ interface NamedBigNumMap {
 }
 
 export default class Num {
+    public static BigNumber = BigNumber;
+
     public readonly num: BigNumber;
 
     public readonly integerPart: string;
@@ -26,10 +28,10 @@ export default class Num {
     public constructor(num: Num | numeric) {
         if (num instanceof Num) {
             this.num = num.num;
-        } else if (num instanceof BigNumber) {
+        } else if (num instanceof Num.BigNumber) {
             this.num = num;
         } else {
-            this.num = new BigNumber(num);
+            this.num = new Num.BigNumber(num);
         }
         if (this.num.isFinite() === false) {
             throw new Error("Invalid number supplied.");
@@ -40,7 +42,7 @@ export default class Num {
             // Normalise to "positive" zero, to avoid weirdness.
             // JS numbers (which BigNumber is emulating) can always be positive or
             // negative zero because they're always technically floating-point numbers.
-            this.num = new BigNumber(0);
+            this.num = new Num.BigNumber(0);
         }
 
         const numStr = this.num.toFixed();
@@ -57,10 +59,10 @@ export default class Num {
     public static convertToBigNum(num: Num | numeric): BigNumber {
         if (num instanceof Num) {
             return num.num;
-        } else if (num instanceof BigNumber) {
+        } else if (num instanceof Num.BigNumber) {
             return num;
         } else {
-            return new BigNumber(num);
+            return new Num.BigNumber(num);
         }
     }
 
@@ -441,12 +443,12 @@ export default class Num {
         const fractionsMap = new Map<number, BigNumber>();
         for (const [idx, ratio] of ratios.entries()) {
             const share = amount.multipliedBy(ratio / total);
-            const fraction = share.minus(share.integerValue(BigNumber.ROUND_FLOOR));
+            const fraction = share.minus(share.integerValue(Num.BigNumber.ROUND_FLOOR));
             fractionsMap.set(idx, fraction);
         };
 
         while (remainder.isGreaterThan(0) === true) {
-            const index = fractionsMap.size > 0 ? searchMapForBigNumber(fractionsMap, BigNumber.max(...fractionsMap.values())) : 0;
+            const index = fractionsMap.size > 0 ? searchMapForBigNumber(fractionsMap, Num.BigNumber.max(...fractionsMap.values())) : 0;
             const match = results.get(index) as BigNumber;
             results.set(index, match.plus(1));
             remainder = remainder.minus(1);
@@ -499,13 +501,13 @@ export default class Num {
         const fractions: NamedBigNumMap = {};
         for (const [key, ratio] of Object.entries(ratios)) {
             const share = amount.multipliedBy(ratio / total);
-            const fraction = share.minus(share.integerValue(BigNumber.ROUND_FLOOR));
+            const fraction = share.minus(share.integerValue(Num.BigNumber.ROUND_FLOOR));
             fractions[key] = fraction;
         }
 
         while (remainder.isGreaterThan(0) === true) {
             // TODO: I don't know how this is supposed to handle the case where Object.keys(fractions).length === 0 for named allocations
-            const index = Object.keys(fractions).length > 0 ? searchObjectForBigNumber(fractions, BigNumber.max(...Object.values(fractions))) : 0;
+            const index = Object.keys(fractions).length > 0 ? searchObjectForBigNumber(fractions, Num.BigNumber.max(...Object.values(fractions))) : 0;
             const match = results[index];
             results[index] = match.plus(1);
             remainder = remainder.minus(1);
@@ -544,7 +546,7 @@ export default class Num {
         amount = Num.convertToBigNum(amount);
 
         // floor(amount * ratio / total)
-        return amount.multipliedBy(ratio).dividedBy(total).integerValue(BigNumber.ROUND_FLOOR);
+        return amount.multipliedBy(ratio).dividedBy(total).integerValue(Num.BigNumber.ROUND_FLOOR);
     }
 
     public negative(): Num {
@@ -628,7 +630,7 @@ export default class Num {
             }
         }
 
-        return new Num(BigNumber.min(...operands));
+        return new Num(Num.BigNumber.min(...operands));
     }
 
     public static max(...collection: (Num | numeric)[]): Num {
@@ -645,7 +647,7 @@ export default class Num {
             }
         }
 
-        return new Num(BigNumber.max(...operands));
+        return new Num(Num.BigNumber.max(...operands));
     }
 
     public static sum(...collection: (Num | numeric)[]): Num {
@@ -671,28 +673,28 @@ export default class Num {
     private _round(roundingMode: RoundingMode): BigNumber {
         switch (roundingMode) {
             case RoundingMode.ROUND_UP:
-                return this.num.integerValue(BigNumber.ROUND_CEIL);
+                return this.num.integerValue(Num.BigNumber.ROUND_CEIL);
             case RoundingMode.ROUND_DOWN:
-                return this.num.integerValue(BigNumber.ROUND_FLOOR);
+                return this.num.integerValue(Num.BigNumber.ROUND_FLOOR);
             case RoundingMode.ROUND_TRUNCATE:
-                return new BigNumber(this.integerPart);
+                return new Num.BigNumber(this.integerPart);
         }
 
         if (this.isHalf === false) {
-            return this.num.integerValue(BigNumber.ROUND_HALF_UP);
+            return this.num.integerValue(Num.BigNumber.ROUND_HALF_UP);
         }
 
         switch (roundingMode) {
             case RoundingMode.ROUND_HALF_UP:
-                return this.num.integerValue(BigNumber.ROUND_HALF_UP);
+                return this.num.integerValue(Num.BigNumber.ROUND_HALF_UP);
             case RoundingMode.ROUND_HALF_DOWN:
-                return this.num.integerValue(BigNumber.ROUND_HALF_DOWN);
+                return this.num.integerValue(Num.BigNumber.ROUND_HALF_DOWN);
             case RoundingMode.ROUND_HALF_EVEN:
-                return this.num.integerValue(BigNumber.ROUND_HALF_EVEN);
+                return this.num.integerValue(Num.BigNumber.ROUND_HALF_EVEN);
             case RoundingMode.ROUND_HALF_POSITIVE_INFINITY:
-                return this.num.integerValue(BigNumber.ROUND_HALF_CEIL);
+                return this.num.integerValue(Num.BigNumber.ROUND_HALF_CEIL);
             case RoundingMode.ROUND_HALF_NEGATIVE_INFINITY:
-                return this.num.integerValue(BigNumber.ROUND_HALF_FLOOR);
+                return this.num.integerValue(Num.BigNumber.ROUND_HALF_FLOOR);
         }
 
         if (roundingMode === RoundingMode.ROUND_HALF_ODD) {
@@ -713,24 +715,24 @@ export default class Num {
 
         switch (roundingMode) {
             case RoundingMode.ROUND_HALF_UP:
-                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_UP);
+                return this.num.decimalPlaces(places, Num.BigNumber.ROUND_HALF_UP);
             case RoundingMode.ROUND_HALF_DOWN:
-                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_DOWN);
+                return this.num.decimalPlaces(places, Num.BigNumber.ROUND_HALF_DOWN);
             case RoundingMode.ROUND_HALF_EVEN:
-                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_EVEN);
+                return this.num.decimalPlaces(places, Num.BigNumber.ROUND_HALF_EVEN);
             case RoundingMode.ROUND_UP:
-                return this.num.decimalPlaces(places, BigNumber.ROUND_CEIL);
+                return this.num.decimalPlaces(places, Num.BigNumber.ROUND_CEIL);
             case RoundingMode.ROUND_DOWN:
-                return this.num.decimalPlaces(places, BigNumber.ROUND_FLOOR);
+                return this.num.decimalPlaces(places, Num.BigNumber.ROUND_FLOOR);
             case RoundingMode.ROUND_HALF_POSITIVE_INFINITY:
-                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_CEIL);
+                return this.num.decimalPlaces(places, Num.BigNumber.ROUND_HALF_CEIL);
             case RoundingMode.ROUND_HALF_NEGATIVE_INFINITY:
-                return this.num.decimalPlaces(places, BigNumber.ROUND_HALF_FLOOR);
+                return this.num.decimalPlaces(places, Num.BigNumber.ROUND_HALF_FLOOR);
             case RoundingMode.ROUND_TRUNCATE:
                 if (this.fractionalPart.length > 0) {
-                    return new BigNumber(`${this.integerPart}.${this.fractionalPart.substr(0, places)}`);
+                    return new Num.BigNumber(`${this.integerPart}.${this.fractionalPart.substr(0, places)}`);
                 } else {
-                    return new BigNumber(this.integerPart);
+                    return new Num.BigNumber(this.integerPart);
                 }
         }
 
@@ -739,18 +741,18 @@ export default class Num {
                 return this._round(RoundingMode.ROUND_HALF_ODD);
             }
 
-            const rounded = this.num.toFixed(places + 1, BigNumber.ROUND_HALF_UP);
+            const rounded = this.num.toFixed(places + 1, Num.BigNumber.ROUND_HALF_UP);
             const lastDigit = parseInt(rounded.slice(-1));
             const secondLastDigit = parseInt(rounded.slice(-2, -1));
             if (lastDigit > 5) {
-                return new BigNumber(rounded.slice(0, -2) + (secondLastDigit + 1));
+                return new Num.BigNumber(rounded.slice(0, -2) + (secondLastDigit + 1));
             } else if (lastDigit < 5) {
-                return new BigNumber(rounded.slice(0, -1));
+                return new Num.BigNumber(rounded.slice(0, -1));
             } else {
                 if (secondLastDigit % 2 === 0) {
-                    return new BigNumber(rounded.slice(0, -2) + (secondLastDigit + 1));
+                    return new Num.BigNumber(rounded.slice(0, -2) + (secondLastDigit + 1));
                 } else {
-                    return new BigNumber(rounded.slice(0, -1));
+                    return new Num.BigNumber(rounded.slice(0, -1));
                 }
             }
         }

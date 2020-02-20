@@ -55,6 +55,35 @@ console.log(fiveFromString.add(5).subtract(5).equals(fiveFromString)) // outputs
 console.log(fiveBigNum.isEqualTo(fiveFromString.num)); // outputs true
 ```
 
+### Support for ``BigNumber.clone()``
+
+bignumber.js lets you create "clones" of the main BigNumber constructor with different
+settings. This lets you have multiple different BigNumber classes in your application,
+each with different defaults.
+
+This functionality is fully supported out of the box by ``Number``.
+
+```typescript
+import { Num } from "@cashmoney/number";
+import BigNumber from "bignumber.js";
+
+const BN = BigNumber.clone({ DECIMAL_PLACES: 10 });
+Num.BigNumber = BN;
+```
+
+The new constructor function ``BN`` will now be used for all constructions of ``BigNumber``
+performed by the ``Num`` class.
+
+If you actually need to do this for some reason, it's strongly recommended that you
+do this once in your application bootstrap code, before any instances of ``Num`` are
+created. Otherwise, you'll likely end up with various weird behaviours in your application.
+You'll also need to be careful if you're constructing your own instances of ``BigNumber``
+in your application and passing them to instances of ``Num``.
+
+Most of the time, you should be able to get away with using ``BigNumber.config()``
+instead. This will automatically take effect for all instances of (the default) ``BigNumber``
+constructor (which ``Num`` uses by default).
+
 ## Tests
 
 To run the test suite, run ``yarn run test`` in the root of the repository.
