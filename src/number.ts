@@ -56,6 +56,21 @@ export default class Num {
         }
     }
 
+    public static random(decimalPlaces: number): Num {
+        return new Num(Num.BigNumber.random(decimalPlaces));
+    }
+
+    public static randomInt(minNumber: Num | numeric, maxNumber: Num | numeric): Num {
+        minNumber = Num.convertToBigNum(minNumber);
+        maxNumber = Num.convertToBigNum(maxNumber);
+
+        const range = maxNumber.minus(minNumber).plus(1);
+        const randomness = Num.BigNumber.random();
+        const result = randomness.times(range).integerValue(Num.BigNumber.ROUND_FLOOR).plus(minNumber);
+
+        return new Num(result);
+    }
+
     public static convertToBigNum(num: Num | numeric): BigNumber {
         if (num instanceof Num) {
             return num.num;
