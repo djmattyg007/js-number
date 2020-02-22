@@ -576,6 +576,23 @@ export default class Num {
         return this.negative();
     }
 
+    public pow(power: Num | numeric): Num {
+        power = Num.convertToBigNum(power);
+        return new Num(this.num.pow(power));
+    }
+
+    public exponentiatedBy(power: Num | numeric): Num {
+        return this.pow(power);
+    }
+
+    public squareRoot(): Num {
+        return new Num(this.num.squareRoot());
+    }
+
+    public sqrt(): Num {
+        return this.squareRoot();
+    }
+
     public mod(divisor: Num | numeric): Num {
         if (divisor instanceof Num) {
             divisor = divisor.num;

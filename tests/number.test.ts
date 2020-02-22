@@ -641,6 +641,52 @@ export default class NumTest {
         ];
     }
 
+    @TestCases(NumTest.powExamples)
+    @Test("it calculates exponentiation results")
+    public itCalculatesExponentiationResults(amount: string, power: number, expected: string) {
+        const num = new Num(amount);
+        const result = num.pow(power);
+
+        Expect(result instanceof Num).toBeTruthy();
+        Expect(result).toBe(new Num(expected));
+        Expect(result.toString()).toBe(expected);
+    }
+
+    public static powExamples() {
+        return [
+            ["1", 2, "1"],
+            ["2", 2, "4"],
+            ["2", 3, "8"],
+            ["2.5", 2, "6.25"],
+            ["3", 2, "9"],
+            ["3", 3, "27"],
+            ["10", 2, "100"],
+            ["12", 2, "144"],
+        ];
+    }
+
+    @TestCases(NumTest.sqrtExamples)
+    @Test("it calculates square roots correctly")
+    public itCalculatesSquareRootsCorrectly(amount: string, expected: string) {
+        const num = new Num(amount);
+        const sqrt = num.squareRoot();
+
+        Expect(sqrt instanceof Num).toBeTruthy();
+        Expect(result).toBe(new Num(expected));
+        Expect(result.toString()).toBe(expected);
+    }
+
+    public static sqrtExamples() {
+        return [
+            ["1", "1"],
+            ["4", "2"],
+            ["6.25", "2.5"],
+            ["9", "3"],
+            ["100", "10"],
+            ["144", "12"],
+        ];
+    }
+
     @TestCases(NumTest.modExamples)
     @Test("it calculates the modulus of an amount")
     public itCalculatesTheModulusOfAnAmount(amount: number, divisor: number, expected: string) {
