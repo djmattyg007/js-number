@@ -1,9 +1,11 @@
 import Num from "./number";
 import { RoundingMode } from "./rounding";
-import { numeric } from "./types";
+import type { numeric } from "./types";
 
 export {
     Num,
     RoundingMode,
+};
+export type {
     numeric,
 };

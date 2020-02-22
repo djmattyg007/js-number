@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { RoundingMode } from "./rounding";
-import { numeric } from "./types";
+import type { numeric } from "./types";
 import { arraySum, searchMapForBigNumber, searchObjectForBigNumber } from "./_util";
 
 interface NamedRatios {

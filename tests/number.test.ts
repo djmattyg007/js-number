@@ -672,8 +672,8 @@ export default class NumTest {
         const sqrt = num.squareRoot();
 
         Expect(sqrt instanceof Num).toBeTruthy();
-        Expect(result).toBe(new Num(expected));
-        Expect(result.toString()).toBe(expected);
+        Expect(sqrt).toBe(new Num(expected));
+        Expect(sqrt.toString()).toBe(expected);
     }
 
     public static sqrtExamples() {

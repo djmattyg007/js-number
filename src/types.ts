@@ -1,3 +1,3 @@
-import BigNumber from "bignumber.js";
+import type BigNumber from "bignumber.js";
 
 export type numeric = BigNumber | number | string;
