@@ -14,7 +14,7 @@
         "typescript": "^3.7.5"
     },
     "scripts": {
-        "build": "tsc",
+        "build": "tsc --module esnext",
         "test": "node run-tests.js 'tests/**/*.test.ts'"
     },
     "main": "dist/index.js",
