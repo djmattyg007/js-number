@@ -341,6 +341,10 @@ export default class Num {
         return new Num(this.num.dividedBy(bigDivisor));
     }
 
+    public divideBy(divisor: Num | numeric): Num {
+        return this.divide(divisor);
+    }
+
     public dividedBy(divisor: Num | numeric): Num {
         return this.divide(divisor);
     }

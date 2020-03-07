@@ -369,11 +369,15 @@ export default class NumTest {
         Expect(result1).toBe(new Num(expected));
         Expect(result1.toString()).toBe(expected);
 
-        const result2 = num.dividedBy(divisor);
-        const result3 = num.div(divisor);
+        const result2 = num.divideBy(divisor);
+        const result3 = num.dividedBy(divisor);
+        const result4 = num.div(divisor);
         compare(result1, result2);
         compare(result1, result3);
+        compare(result1, result4);
         compare(result2, result3);
+        compare(result2, result4);
+        compare(result3, result4);
     }
 
     public static divisionExamples() {
@@ -492,14 +496,25 @@ export default class NumTest {
     public itDisallowsDivideByZero() {
         const num = new Num(1);
 
-        Expect(() => num.divide(0)).toThrow();
-        Expect(() => num.dividedBy(0)).toThrow();
-        Expect(() => num.divide("0")).toThrow();
-        Expect(() => num.dividedBy("0")).toThrow();
-        Expect(() => num.divide(-0)).toThrow();
-        Expect(() => num.dividedBy(-0)).toThrow();
-        Expect(() => num.divide("-0")).toThrow();
-        Expect(() => num.dividedBy("-0")).toThrow();
+        const throwFn = (func: (...args: any[]) => any): void => {
+            Expect(func).toThrowError(Error, "Cannot divide by zero.");
+        }
+
+        const throwingFn = (val: number | string): void => {
+            throwFn(() => num.divide(val));
+            throwFn(() => num.divideBy(val));
+            throwFn(() => num.dividedBy(val));
+            throwFn(() => num.div(val));
+            throwFn(() => num.intDivide(val));
+            throwFn(() => num.dividedToIntegerBy(val));
+            throwFn(() => num.idiv(val));
+            throwFn(() => num.intdiv(val));
+        }
+
+        throwingFn(0);
+        throwingFn("0");
+        throwingFn(-0);
+        throwingFn("-0");
     }
 
     @TestCases(NumTest.ceilExamples)
