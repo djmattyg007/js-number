@@ -74,11 +74,20 @@ export default class Num {
     public static convertToBigNum(num: Num | numeric): BigNumber {
         if (num instanceof Num) {
             return num.num;
-        } else if (num instanceof Num.BigNumber) {
-            return num;
-        } else {
-            return new Num.BigNumber(num);
         }
+
+        let bigNum: BigNumber;
+        if (num instanceof Num.BigNumber) {
+            bigNum = num;
+        } else {
+            bigNum = new Num.BigNumber(num);
+        }
+
+        if (bigNum.isFinite() === false) {
+            throw new Error("Invalid number supplied.");
+        }
+
+        return bigNum;
     }
 
     public toString(): string {
