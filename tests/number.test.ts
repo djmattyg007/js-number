@@ -217,7 +217,7 @@ export default class NumTest {
         const checkFn = (result: BigNumber): void => {
             Expect(result instanceof Num.BigNumber).toBeTruthy();
             Expect(result.toFixed()).toBe(expected);
-        }
+        };
 
         const addResult = Num.add(startValue, addends);
         checkFn(addResult);
@@ -296,7 +296,7 @@ export default class NumTest {
         const checkFn = (result: BigNumber): void => {
             Expect(result instanceof Num.BigNumber).toBeTruthy();
             Expect(result.toFixed()).toBe(expected);
-        }
+        };
 
         const subtractResult = Num.subtract(startValue, subtrahends);
         checkFn(subtractResult);
