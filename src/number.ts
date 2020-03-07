@@ -161,7 +161,7 @@ export default class Num {
             return true;
         }
 
-        return this.num.isPositive();
+        return this.num.isNegative();
     }
 
     private getIntegerRoundingMultiplier(): 1 | -1 {
