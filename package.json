@@ -8,14 +8,18 @@
         "bignumber.js": "^9.0.0"
     },
     "devDependencies": {
+        "@istanbuljs/nyc-config-typescript": "^1.0.1",
         "alsatian": "^3.2.1",
+        "nyc": "^15.0.0",
+        "source-map-support": "^0.5.16",
         "ts-node": "^8.6.2",
         "tsconfig-paths": "^3.9.0",
         "typescript": "^3.8.3"
     },
     "scripts": {
         "build": "tsc --module esnext",
-        "test": "node run-tests.js 'tests/**/*.test.ts'"
+        "test": "node run-tests.js 'tests/**/*.test.ts'",
+        "coverage": "nyc --reporter=lcov --reporter=html yarn run test"
     },
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
