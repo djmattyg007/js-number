@@ -31,6 +31,39 @@ export default class NumTest {
         return ([] as any[]).concat(badValues, badNumbers).map((val: any) => [val]);
     }
 
+    @Test("it accepts other Num instances during construction")
+    public itAcceptsOtherNumInstances() {
+        const num1 = new Num(123);
+        const num2 = new Num(num1);
+
+        Expect(num2 instanceof Num).toBeTruthy();
+        Expect(num2.toString()).toBe("123");
+        Expect(num2).toBe(num1);
+    }
+
+    @Test("it generates random numbers")
+    public itGeneratesRandomNumbers() {
+        for (let x = 1; x < 10; x++) {
+            const num = Num.random(x);
+            Expect(num.fractionalPart.length <= x).toBeTruthy();
+            Expect(num).toBeADecimal();
+        }
+    }
+
+    @Test("it generates random integers")
+    public itGeneratesRandomIntegers() {
+        const randomNum1 = Num.randomInt(1, 10);
+
+        Expect(randomNum1 instanceof Num).toBeTruthy();
+        Expect(randomNum1).toBeAnInteger();
+        Expect(randomNum1).toBeGreaterThan(new Num(0));
+        Expect(randomNum1).toBeLessThan(new Num(11));
+
+        const randomNum2 = Num.randomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
+        Expect(randomNum2 instanceof Num).toBeTruthy();
+        Expect(randomNum2).toBeAnInteger();
+    }
+
     @TestCases(NumTest.equalityExamples)
     @Test("it equals to another number")
     public itEqualsToAnotherNumber(amount: number, equality: boolean) {
