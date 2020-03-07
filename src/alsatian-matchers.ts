@@ -76,6 +76,16 @@ export class NumMatcher extends Matcher<Num> {
         );
     }
 
+    public toBePositiveOrZero() {
+        this._registerMatcher(
+            (this.actualValue.isPositiveOrZero) === this.shouldMatch,
+            `Expected ${JSON.stringify(this.actualValue)} ${
+                !this.shouldMatch ? "" : "not "
+            }` + `to be negative.`,
+            this.shouldMatch ? "not negative" : "negative"
+        );
+    }
+
     public toBeNegative() {
         this._registerMatcher(
             (this.actualValue.isNegative) === this.shouldMatch,
@@ -83,6 +93,16 @@ export class NumMatcher extends Matcher<Num> {
                 !this.shouldMatch ? "not " : ""
             }` + `to be negative.`,
             this.shouldMatch ? "negative" : "positive"
+        );
+    }
+
+    public toBeNegativeOrZero() {
+        this._registerMatcher(
+            (this.actualValue.isNegativeOrZero) === this.shouldMatch,
+            `Expected ${JSON.stringify(this.actualValue)} ${
+                !this.shouldMatch ? "" : "not "
+            }` + `to be positive.`,
+            this.shouldMatch ? "not positive" : "positive"
         );
     }
 
@@ -123,6 +143,16 @@ export class NumMatcher extends Matcher<Num> {
                 !this.shouldMatch ? "not " : ""
             }` + `to be odd.`,
             this.shouldMatch ? "odd" : "even"
+        );
+    }
+
+    public toBeCloserToNext() {
+        this._registerMatcher(
+            (this.actualValue.isCloserToNext) === this.shouldMatch,
+            `Expected ${JSON.stringify(this.actualValue)} ${
+                !this.shouldMatch ? "not ": ""
+            }` + `to be closer to the next integer.`,
+            this.shouldMatch ? "closer" : "not closer"
         );
     }
 }

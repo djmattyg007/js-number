@@ -1,6 +1,8 @@
 /// <reference path = "../src/alsatian-ambient.d.ts" />
 import { TestFixture, Test, TestCases, Expect } from "alsatian";
 
+import type BigNumber from "bignumber.js";
+
 import Num from "src/number";
 import { RoundingMode } from "src/rounding";
 import { numeric } from "src/types";
@@ -16,7 +18,14 @@ export default class NumTest {
     @Test("it disallows invalid number values")
     public itDisallowsInvalidNumberValues(value: any) {
         const throwFn = () => new Num(value as numeric);
-        Expect(throwFn).toThrow();
+        Expect(throwFn).toThrowError(Error, "Invalid number supplied.");
+    }
+
+    @TestCases(NumTest.invalidNumberExamples)
+    @Test("it disallows converting to bignumbers from invalid number values")
+    public itDisallowsConvertingToBigNumberFromInvalidNumberValues(value: any) {
+        const throwFn = () => new Num(value as numeric);
+        Expect(throwFn).toThrowError(Error, "Invalid number supplied.");
     }
 
     public static invalidNumberExamples() {
@@ -46,7 +55,11 @@ export default class NumTest {
         for (let x = 1; x < 10; x++) {
             const num = Num.random(x);
             Expect(num.fractionalPart.length <= x).toBeTruthy();
-            Expect(num).toBeADecimal();
+            if (num.fractionalPart.length > 0) {
+                Expect(num).toBeADecimal();
+            } else {
+                Expect(num).toBeAnInteger();
+            }
         }
     }
 
@@ -125,6 +138,36 @@ export default class NumTest {
         ];
     }
 
+    @TestCases(NumTest.isCloserToNextExamples)
+    @Test("it checks if number is closer to the next integer")
+    public isCloserToNext(amount: numeric, isCloser: boolean) {
+        const num = new Num(amount);
+        if (isCloser) {
+            Expect(num).toBeCloserToNext();
+        } else {
+            Expect(num).not.toBeCloserToNext();
+        }
+    }
+
+    public static isCloserToNextExamples() {
+        return [
+            ["123", false],
+            ["123.0", false],
+            ["123.4", false],
+            ["123.5", true],
+            ["123.50", true],
+            ["123.50001", true],
+            ["123.6", true],
+            ["123.000001", false],
+            ["123.01", false],
+            ["123.05", false],
+            ["123.09", false],
+            ["123.9", true],
+            ["123.99999", true],
+            ["124", false],
+        ];
+    }
+
     @TestCases(NumTest.addExamples)
     @Test("it adds numbers")
     public itAddsNumbers(addend: number, result1: string, result2: string) {
@@ -161,6 +204,48 @@ export default class NumTest {
             [-0, '10', '10'],
             [-5, '5', '0'],
             [-50, '-40', '-90'],
+        ];
+    }
+
+    @TestCases(NumTest.staticAddExamples)
+    @Test("it statically adds lots of numbers")
+    public itStaticallyAddsNumbers(startValue: Num | numeric, addends: Iterable<Num | numeric>, expected: string) {
+        const checkFn = (result: BigNumber): void => {
+            Expect(result instanceof Num.BigNumber).toBeTruthy();
+            Expect(result.toFixed()).toBe(expected);
+        }
+
+        const addResult = Num.add(startValue, addends);
+        checkFn(addResult);
+
+        const plusResult = Num.plus(startValue, addends);
+        checkFn(plusResult);
+    }
+
+    public static staticAddExamples() {
+        return [
+            [0, [1, 2, 3], "6"],
+            [new Num(0), [1, 2, 3], "6"],
+            [new Num.BigNumber(0), [1, 2, 3], "6"],
+            [0, [1, new Num(2), new Num.BigNumber(3)], "6"],
+            [new Num(0), [1, new Num(2), new Num.BigNumber(3)], "6"],
+            [new Num.BigNumber(0), [1, new Num(2), new Num.BigNumber(3)], "6"],
+            [5, [2.5, 5, 7.5], "20"],
+            [new Num(5), [2.5, 5, 7.5], "20"],
+            [new Num.BigNumber(5), [2.5, 5, 7.5], "20"],
+            [5, [new Num.BigNumber(2.5), 5, new Num(7.5)], "20"],
+            [new Num(5), [new Num.BigNumber(2.5), 5, new Num(7.5)], "20"],
+            [new Num.BigNumber(5), [new Num.BigNumber(2.5), 5, new Num(7.5)], "20"],
+            [1.5, [2.25], "3.75"],
+            [new Num(1.5), [2.25], "3.75"],
+            [new Num.BigNumber(1.5), [2.25], "3.75"],
+            [1.5, [new Num(2.25)], "3.75"],
+            [new Num(1.5), [new Num(2.25)], "3.75"],
+            [new Num.BigNumber(1.5), [new Num(2.25)], "3.75"],
+            [1.5, [new Num.BigNumber(2.25)], "3.75"],
+            [new Num(1.5), [new Num.BigNumber(2.25)], "3.75"],
+            [new Num.BigNumber(1.5), [new Num.BigNumber(2.25)], "3.75"],
+            [42, [], "42"],
         ];
     }
 
@@ -856,14 +941,11 @@ export default class NumTest {
         Expect(numObj.fractionalPart).toBe(fractionalPart);
     }
 
-    public static numberExamples() {
-        const maxIntStr = String(Number.MAX_SAFE_INTEGER);
-        const minIntStr = String(Number.MIN_SAFE_INTEGER);
-
+    public static simpleNumberExamples() {
         /**
          *   n   int   dec   half   even   odd   zero   pos   neg   intPart fracPart
          */
-        const simpleExamples = [
+        return [
             [0, true, false, false, true, false, true, false, false, '0', ''],
             [-0, true, false, false, true, false, true, false, false, '0', ''],
             ['0', true, false, false, true, false, true, false, false, '0', ''],
@@ -891,6 +973,13 @@ export default class NumTest {
             ['-.5', false, true, true, true, false, false, false, true, '-0', '5'],
             ['.5', false, true, true, true, false, false, true, false, '0', '5'],
         ];
+    }
+
+    public static numberExamples() {
+        const maxIntStr = String(Number.MAX_SAFE_INTEGER);
+        const minIntStr = String(Number.MIN_SAFE_INTEGER);
+
+        const simpleExamples = NumTest.simpleNumberExamples();
 
         /**
          *   n   int   dec   half   even   odd   zero   pos   neg   intPart fracPart
@@ -952,6 +1041,48 @@ export default class NumTest {
         return finalExampleList.concat(complexExamples);
     }
 
+    @TestCases(NumTest.signCheckExamples)
+    @Test("it has sign checks")
+    public itHasSignChecks(value: string | number, zero: boolean, positive: boolean, negative: boolean) {
+        const num = new Num(value);
+
+        if (zero) {
+            Expect(num).toBeZero();
+        } else {
+            Expect(num).not.toBeZero();
+        }
+
+        if (positive) {
+            Expect(num).toBePositive();
+        } else {
+            Expect(num).not.toBePositive();
+        }
+
+        if (zero || positive) {
+            Expect(num).toBePositiveOrZero();
+        } else {
+            Expect(num).not.toBePositiveOrZero();
+        }
+
+        if (negative) {
+            Expect(num).toBeNegative();
+        } else {
+            Expect(num).not.toBeNegative();
+        }
+
+        if (zero || negative) {
+            Expect(num).toBeNegativeOrZero();
+        } else {
+            Expect(num).not.toBeNegativeOrZero();
+        }
+    }
+
+    public static *signCheckExamples() {
+        for (const example of NumTest.simpleNumberExamples()) {
+            yield [example[0], example[6], example[7], example[8]];
+        }
+    }
+
     @TestCases(NumTest.shiftExamples)
     @Test("it shifts the decimal place left and right")
     public shift(numStr: string, n: number, shiftLeftExpected: string, shiftRightExpected: string) {
@@ -989,6 +1120,17 @@ export default class NumTest {
             ['-0.05', -3, '-50', '-0.00005'],
             ['-0.5', -3, '-500', '-0.0005'],
         ];
+    }
+
+    @Test("it can only shift left or right by whole integers")
+    public itCanOnlyShiftByWholeIntegers() {
+        const num = new Num("12.34");
+
+        const throwLeft = () => num.shiftLeft(1.5);
+        const throwRight = () => num.shiftRight(-1.5);
+
+        Expect(throwLeft).toThrowError(Error, "Can only shift by whole number amounts.");
+        Expect(throwRight).toThrowError(Error, "Can only shift by whole number amounts.");
     }
 
     @Test("it converts to JSON")
@@ -1080,5 +1222,19 @@ export default class NumTest {
     @Test("it calculates averages")
     public itCalculatesAverage(values: Num[], avg: Num) {
         Expect(Num.avg(...values)).toBe(avg);
+    }
+
+    @Test("the collection methods reject empty collections")
+    public theCollectionMethodsRejectEmptyCollections() {
+        const throwFns = [
+            () => Num.min(),
+            () => Num.max(),
+            () => Num.sum(),
+            () => Num.avg(),
+        ];
+
+        for (const throwFn of throwFns) {
+            Expect(throwFn).toThrowError(Error, "Must pass at least one number.");
+        }
     }
 }
