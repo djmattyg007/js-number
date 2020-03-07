@@ -24,7 +24,7 @@ export default class NumTest {
     @TestCases(NumTest.invalidNumberExamples)
     @Test("it disallows converting to bignumbers from invalid number values")
     public itDisallowsConvertingToBigNumberFromInvalidNumberValues(value: any) {
-        const throwFn = () => new Num(value as numeric);
+        const throwFn = () => Num.convertToBigNum(value as numeric);
         Expect(throwFn).toThrowError(Error, "Invalid number supplied.");
     }
 
