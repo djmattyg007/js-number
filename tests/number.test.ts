@@ -286,10 +286,52 @@ export default class NumTest {
         ];
     }
 
+    @TestCases(NumTest.staticSubtractExamples)
+    @Test("it statically subtracts lots of numbers")
+    public itStaticallySubtractsNumbers(startValue: Num | numeric, subtrahends: Iterable<Num | numeric>, expected: string) {
+        const checkFn = (result: BigNumber): void => {
+            Expect(result instanceof Num.BigNumber).toBeTruthy();
+            Expect(result.toFixed()).toBe(expected);
+        }
+
+        const subtractResult = Num.subtract(startValue, subtrahends);
+        checkFn(subtractResult);
+
+        const minusResult = Num.minus(startValue, subtrahends);
+        checkFn(minusResult);
+    }
+
+    public static staticSubtractExamples() {
+        return [
+            [0, [1, 2, 3], "-6"],
+            [new Num(0), [1, 2, 3], "-6"],
+            [new Num.BigNumber(0), [1, 2, 3], "-6"],
+            [0, [1, new Num(2), new Num.BigNumber(3)], "-6"],
+            [new Num(0), [1, new Num(2), new Num.BigNumber(3)], "-6"],
+            [new Num.BigNumber(0), [1, new Num(2), new Num.BigNumber(3)], "-6"],
+            [5, [2.5, 5, 7.5], "-10"],
+            [new Num(5), [2.5, 5, 7.5], "-10"],
+            [new Num.BigNumber(5), [2.5, 5, 7.5], "-10"],
+            [5, [new Num.BigNumber(2.5), 5, new Num(7.5)], "-10"],
+            [new Num(5), [new Num.BigNumber(2.5), 5, new Num(7.5)], "-10"],
+            [new Num.BigNumber(5), [new Num.BigNumber(2.5), 5, new Num(7.5)], "-10"],
+            [1.5, [2.25], "-0.75"],
+            [new Num(1.5), [2.25], "-0.75"],
+            [new Num.BigNumber(1.5), [2.25], "-0.75"],
+            [1.5, [new Num(2.25)], "-0.75"],
+            [new Num(1.5), [new Num(2.25)], "-0.75"],
+            [new Num.BigNumber(1.5), [new Num(2.25)], "-0.75"],
+            [1.5, [new Num.BigNumber(2.25)], "-0.75"],
+            [new Num(1.5), [new Num.BigNumber(2.25)], "-0.75"],
+            [new Num.BigNumber(1.5), [new Num.BigNumber(2.25)], "-0.75"],
+            [42, [], "42"],
+        ];
+    }
+
     // TODO: Introduce property-based testing for this test
     @TestCases(NumTest.constantNumberExamples)
     @Test("it multiplies the amount")
-    public itMultipliesTheAmount(multiplier: number) {
+    public itMultipliesTheAmount(multiplier: Num | number) {
         const oneNum = new Num(1);
         const tenNum = new Num(10);
 
@@ -328,7 +370,7 @@ export default class NumTest {
     // TOOD: Introduce property-based testing for this test
     @TestCases(NumTest.constantNumberExamples)
     @Test("multiplying by zero always gives zero")
-    public multiplyingByZeroGivesZero(amount: number) {
+    public multiplyingByZeroGivesZero(amount: Num | number) {
         const num = new Num(amount);
         const multipliedNum = num.multiply(0);
 
@@ -340,7 +382,7 @@ export default class NumTest {
     // TOOD: Introduce property-based testing for this test
     @TestCases(NumTest.constantNumberExamples)
     @Test("multiplying by one gives the same amount")
-    public multiplyingByOneGivesSameAmount(amount: number) {
+    public multiplyingByOneGivesSameAmount(amount: Num | number) {
         const num = new Num(amount);
         const multipliedNum = num.multiply(1);
 
@@ -349,9 +391,13 @@ export default class NumTest {
         Expect(multipliedNum).toEqual(num);
     }
 
-    public static constantNumberExamples() {
+    public static *constantNumberExamples() {
         const numbers = [1, 0.1, 0.5, 2, 10, 10.5, 100, 0, -0, -0.1, -0.5, -1, -2, -10, -15.8, -100];
-        return numbers.map(num => [num]);
+        for (const num of numbers) {
+            yield [num];
+            yield [new Num.BigNumber(num)];
+            yield [new Num(num)];
+        }
     }
 
     @TestCases(NumTest.divisionExamples)
@@ -466,7 +512,7 @@ export default class NumTest {
     // TODO: Introduce property-based testing for this test
     @TestCases(NumTest.constantNumberExamples)
     @Test("dividing by one gives the same amount")
-    public dividingByOneGivesSameAmount(amount: number) {
+    public dividingByOneGivesSameAmount(amount: Num | number) {
         const num = new Num(amount);
         const dividedNum = num.divide(1);
 
@@ -478,9 +524,13 @@ export default class NumTest {
     // TODO: Introduce property-based testing for this test
     @TestCases(NumTest.constantNumberExamples)
     @Test("dividing zero by anything gives zero")
-    public dividingZeroByAnythingGivesZero(amount: number) {
-        if (amount === 0) {
-            // Easier than anything else
+    public dividingZeroByAnythingGivesZero(amount: Num | number) {
+        // Easier than anything else
+        if (amount instanceof Num && amount.isZero) {
+            return;
+        } else if (amount instanceof Num.BigNumber && amount.isZero()) {
+            return;
+        } else if (amount === 0) {
             return;
         }
 
@@ -680,7 +730,8 @@ export default class NumTest {
 
     public static allocationNamedExamples() {
         return [
-            [101, {'foo': 7, 'bar': 3}, {'foo': 71, 'bar': 30}],
+            [100, {"foo": 7, "bar": 3}, {"foo": 70, "bar": 30}],
+            [101, {"foo": 7, "bar": 3}, {"foo": 71, "bar": 30}],
         ];
     }
 
@@ -887,6 +938,7 @@ export default class NumTest {
         Expect(percentageNum).toBe(new Num(expected));
         Expect(percentageNum.toString()).toBe(expected);
         Expect(percentageNum).toBeLessThanOrEqual(num);
+        Expect(percentageNum).toBeGreaterThanOrEqual(new Num(0));
     }
 
     public static percentageExamples() {
@@ -922,6 +974,7 @@ export default class NumTest {
         Expect(percentageNum).toBe(new Num(expected));
         Expect(percentageNum.toString()).toBe(expected);
         Expect(percentageNum).toBeLessThanOrEqual(num);
+        Expect(percentageNum).toBeGreaterThanOrEqual(new Num(0));
     }
 
     public static subtractPercentageExamples() {
@@ -1116,6 +1169,30 @@ export default class NumTest {
     public static *signCheckExamples() {
         for (const example of NumTest.simpleNumberExamples()) {
             yield [example[0], example[6], example[7], example[8]];
+        }
+    }
+
+    @TestCases(NumTest.evennessCheckExamples)
+    @Test("it has evenness checks")
+    public itHasEvennessChecks(value: string | number, even: boolean, odd: boolean) {
+        const num = new Num(value);
+
+        if (even) {
+            Expect(num).toBeEven();
+        } else {
+            Expect(num).not.toBeEven();
+        }
+
+        if (odd) {
+            Expect(num).toBeOdd();
+        } else {
+            Expect(num).not.toBeOdd();
+        }
+    }
+
+    public static *evennessCheckExamples() {
+        for (const example of NumTest.simpleNumberExamples()) {
+            yield [example[0], example[4], example[5]];
         }
     }
 
