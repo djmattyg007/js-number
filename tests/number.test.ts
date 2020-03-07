@@ -102,30 +102,34 @@ export default class NumTest {
     @TestCases(NumTest.comparisonExamples)
     @Test("it compares two numbers")
     public itComparesTwoNumbers(otherAmount: number, result: number) {
+        const checkFn = (num: Num, otherNum: Num | number): void => {
+            Expect(num.compare(otherNum)).toBe(result);
+            Expect(num.compareTo(otherNum)).toBe(result);
+            Expect(num.comparedTo(otherNum)).toBe(result);
+
+            Expect(num.greaterThan(otherNum)).toBe(result === 1);
+            Expect(num.isGreaterThan(otherNum)).toBe(result === 1);
+
+            Expect(num.greaterThanOrEqual(otherNum)).toBe(result >= 0);
+            Expect(num.isGreaterThanOrEqualTo(otherNum)).toBe(result >= 0);
+
+            Expect(num.lessThan(otherNum)).toBe(result === -1);
+            Expect(num.isLessThan(otherNum)).toBe(result === -1);
+
+            Expect(num.lessThanOrEqual(otherNum)).toBe(result <= 0);
+            Expect(num.isLessThanOrEqualTo(otherNum)).toBe(result <= 0);
+        };
+
         const num = new Num(DEFAULT_AMOUNT);
         const otherNum = new Num(otherAmount);
-
-        Expect(num.compare(otherNum)).toBe(result);
-        Expect(num.compareTo(otherNum)).toBe(result);
-        Expect(num.comparedTo(otherNum)).toBe(result);
-
-        Expect(num.greaterThan(otherNum)).toBe(result === 1);
-        Expect(num.isGreaterThan(otherNum)).toBe(result === 1);
-
-        Expect(num.greaterThanOrEqual(otherNum)).toBe(result >= 0);
-        Expect(num.isGreaterThanOrEqualTo(otherNum)).toBe(result >= 0);
-
-        Expect(num.lessThan(otherNum)).toBe(result === -1);
-        Expect(num.isLessThan(otherNum)).toBe(result === -1);
-
-        Expect(num.lessThanOrEqual(otherNum)).toBe(result <= 0);
-        Expect(num.isLessThanOrEqualTo(otherNum)).toBe(result <= 0);
-
+        checkFn(num, otherNum);
         if (result === 0) {
             Expect(num).toBe(otherNum);
         } else {
             Expect(num).not.toBe(otherNum);
         }
+
+        checkFn(num, otherAmount);
     }
 
     public static comparisonExamples() {
