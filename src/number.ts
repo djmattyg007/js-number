@@ -56,7 +56,7 @@ export default class Num {
         }
     }
 
-    public static random(decimalPlaces: number): Num {
+    public static random(decimalPlaces?: number): Num {
         return new Num(Num.BigNumber.random(decimalPlaces));
     }
 
