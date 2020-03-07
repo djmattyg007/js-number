@@ -601,13 +601,16 @@ export default class NumTest {
 
     @TestCases(roundToDecimalPlacesExamples)
     @Test("it rounds to N number of decimal places")
-    public itRoundsToNDecimalPlaces(amount: string, places: number, roundingMode: RoundingMode, expected: string) {
+    public itRoundsToNDecimalPlaces(amount: string, places: number, roundingMode: RoundingMode, expected: string, expectedStr?: string) {
         const num = new Num(amount);
-        const roundedNum = num.roundToDecimalPlaces(places, roundingMode);
 
+        const roundedNum = num.roundToDecimalPlaces(places, roundingMode);
         Expect(roundedNum instanceof Num).toBeTruthy();
         Expect(roundedNum).toBe(new Num(expected));
         Expect(roundedNum.toString()).toBe(expected);
+
+        const roundedStr = num.toRoundedString(places, roundingMode);
+        Expect(roundedStr).toBe(expectedStr ? expectedStr : expected);
     }
 
     @TestCases(NumTest.allocationExamples)
@@ -763,11 +766,14 @@ export default class NumTest {
     @Test("it calculates exponentiation results")
     public itCalculatesExponentiationResults(amount: string, power: number, expected: string) {
         const num = new Num(amount);
-        const result = num.pow(power);
 
-        Expect(result instanceof Num).toBeTruthy();
-        Expect(result).toBe(new Num(expected));
-        Expect(result.toString()).toBe(expected);
+        const pow = num.pow(power);
+        Expect(pow instanceof Num).toBeTruthy();
+        Expect(pow).toBe(new Num(expected));
+        Expect(pow.toString()).toBe(expected);
+
+        const exponentiated = num.exponentiatedBy(power);
+        Expect(exponentiated).toBe(pow);
     }
 
     public static powExamples() {
@@ -787,11 +793,14 @@ export default class NumTest {
     @Test("it calculates square roots correctly")
     public itCalculatesSquareRootsCorrectly(amount: string, expected: string) {
         const num = new Num(amount);
-        const sqrt = num.squareRoot();
 
-        Expect(sqrt instanceof Num).toBeTruthy();
-        Expect(sqrt).toBe(new Num(expected));
-        Expect(sqrt.toString()).toBe(expected);
+        const squareRoot = num.squareRoot();
+        Expect(squareRoot instanceof Num).toBeTruthy();
+        Expect(squareRoot).toBe(new Num(expected));
+        Expect(squareRoot.toString()).toBe(expected);
+
+        const sqrt = num.sqrt();
+        Expect(sqrt).toBe(squareRoot);
     }
 
     public static sqrtExamples() {
@@ -807,7 +816,7 @@ export default class NumTest {
 
     @TestCases(NumTest.modExamples)
     @Test("it calculates the modulus of an amount")
-    public itCalculatesTheModulusOfAnAmount(amount: number, divisor: number, expected: string) {
+    public itCalculatesTheModulusOfAnAmount(amount: numeric, divisor: Num | numeric, expected: string) {
         const num = new Num(amount);
 
         const compare = (num1: Num, num2: Num): void => {
@@ -826,10 +835,22 @@ export default class NumTest {
 
     public static modExamples() {
         return [
-            [11, 5, '1'],
-            [9, 3, '0'],
-            [1006, 10, '6'],
-            [1007, 10, '7'],
+            [11, 5, "1"],
+            ["11", "5", "1"],
+            ["11", new Num.BigNumber("5"), "1"],
+            ["11", new Num("5"), "1"],
+            [9, 3, "0"],
+            ["9", "3", "0"],
+            ["9", new Num.BigNumber("3"), "0"],
+            ["9", new Num("3"), "0"],
+            [1006, 10, "6"],
+            ["1006", "10", "6"],
+            ["1006", new Num.BigNumber("10"), "6"],
+            ["1006", new Num("10"), "6"],
+            [1007, 10, "7"],
+            ["1007", "10", "7"],
+            ["1007", new Num.BigNumber("10"), "7"],
+            ["1007", new Num("10"), "7"],
         ];
     }
 
