@@ -22,6 +22,7 @@
     "scripts": {
         "build": "tsc --module esnext",
         "test": "node run-tests.js 'tests/**/*.test.*'",
+        "test-fast": "CM_TEST_FAST=true node run-tests.js 'tests/**/*.test.*'",
         "coverage": "nyc --reporter=lcov --reporter=html yarn run test",
         "mutate": "stryker run"
     },

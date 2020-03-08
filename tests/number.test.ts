@@ -19,6 +19,11 @@ export default class NumTest {
         const num = new Num(-0);
         Expect(num).toBe(new Num(0));
         Expect(num.toString()).toBe("0");
+        Expect(num).toBeZero();
+        Expect(num).not.toBePositive();
+        Expect(num).toBePositiveOrZero();
+        Expect(num).not.toBeNegative();
+        Expect(num).toBeNegativeOrZero();
     }
 
     @TestCases(NumTest.invalidNumberExamples)
@@ -689,20 +694,43 @@ export default class NumTest {
         Expect(roundedStr).toBe(expectedStr ? expectedStr : expected);
     }
 
+    @Test("it only understands decimal place counts that are positive integers")
+    public itOnlyUnderstandsPositiveIntegerDecimalPlaceCounts() {
+        const num = new Num(2.5);
+
+        const throwFns = [
+            () => num.roundToDecimalPlaces(2.5),
+            () => num.roundToDecimalPlaces(-2.5),
+            () => num.roundToDecimalPlaces(-1),
+            () => num.toRoundedString(2.5),
+            () => num.toRoundedString(-2.5),
+            () => num.toRoundedString(-1),
+        ];
+
+        for (const throwFn of throwFns) {
+            Expect(throwFn).toThrowError(Error, "Number of decimal places must be a positive integer.");
+        }
+    }
+
     @TestCases(NumTest.allocationExamples)
     @Test("it allocates an amount")
     public itAllocatesAmount(amount: number, ratios: number[], results: number[]) {
         const num = new Num(amount);
         const allocated = num.allocate(ratios);
 
+        let entryCount = 0;
         for (const [key, num] of [...allocated].entries()) {
+            entryCount++;
             const compareTo = new Num(results[key]);
             Expect(num).toBe(compareTo);
         }
+
+        Expect(entryCount).toBe(ratios.length);
     }
 
     public static allocationExamples() {
         return [
+            [99, [1, 1, 1], [33, 33, 33]],
             [100, [1, 1, 1], [34, 33, 33]],
             [101, [1, 1, 1], [34, 34, 33]],
             [5, [3, 7], [2, 3]],
@@ -733,16 +761,26 @@ export default class NumTest {
         const num = new Num(amount);
         const allocated = num.allocateNamed(ratios);
 
+        let entryCount = 0;
         for (const [name, num] of Object.entries(allocated)) {
+            entryCount++;
             const compareTo = new Num(results[name]);
             Expect(num).toBe(compareTo);
         }
+
+        Expect(entryCount).toBe(Object.keys(ratios).length);
     }
 
     public static allocationNamedExamples() {
         return [
+            [99, {"foo": 1, "bar": 1, "baz": 1}, {"foo": 33, "bar": 33, "baz": 33}],
+            [100, {"foo": 1, "bar": 1, "baz": 1}, {"foo": 34, "bar": 33, "baz": 33}],
+            [101, {"foo": 1, "bar": 1, "baz": 1}, {"foo": 34, "bar": 34, "baz": 33}],
             [100, {"foo": 7, "bar": 3}, {"foo": 70, "bar": 30}],
             [101, {"foo": 7, "bar": 3}, {"foo": 71, "bar": 30}],
+            [100, {"foo": 0, "bar": 1, "baz": 1}, {"foo": 0, "bar": 50, "baz": 50}],
+            [100, {"foo": 0, "bar": 5, "baz": 5}, {"foo": 0, "bar": 50, "baz": 50}],
+            [100, {"foo": 0, "bar": 50, "baz": 50}, {"foo": 0, "bar": 50, "baz": 50}],
         ];
     }
 
@@ -807,10 +845,14 @@ export default class NumTest {
         const num = new Num(amount);
         const allocated = num.allocateTo(target);
 
+        let entryCount = 0;
         for (const [key, num] of [...allocated].entries()) {
+            entryCount++;
             const compareTo = new Num(results[key]);
             Expect(num).toBe(compareTo);
         }
+
+        Expect(entryCount).toBe(target);
     }
 
     public static allocationTargetExamples() {

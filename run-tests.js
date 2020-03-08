@@ -6,7 +6,11 @@ const path = require("path");
 process.env.TS_NODE_PROJECT = path.join(__dirname, "tests", "tsconfig.json");
 
 Object.defineProperty(exports, "__esModule", { value: true });
-require("ts-node/register");
+if (process.env.CM_TEST_FAST === "true") {
+    require("ts-node/register/transpile-only");
+} else {
+    require("ts-node/register");
+}
 require("tsconfig-paths/register");
 
 require("./tests/bootstrap");
