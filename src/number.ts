@@ -499,7 +499,7 @@ export default class Num {
 
     public static allocateNamed(amount: Num | numeric, ratios: NamedRatios): NamedBigNumMap {
         if (Object.keys(ratios).length === 0) {
-            throw new Error("Cannot allocate to none, ratios must be an empty array.");
+            throw new Error("Cannot allocate to none, ratios cannot be an empty mapping.");
         }
 
         amount = Num.convertToBigNum(amount);

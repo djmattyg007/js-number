@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("ts-node/register");
 require("tsconfig-paths/register");
 
-require("./tests/bootstrap.ts");
+require("./tests/bootstrap");
 
 const alsatian_cli_options_1 = require("alsatian/dist/cli/alsatian-cli-options");
 const cli_test_runner_1 = require("alsatian/dist/cli/cli-test-runner");

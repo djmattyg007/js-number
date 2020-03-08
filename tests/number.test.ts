@@ -14,6 +14,13 @@ const DEFAULT_AMOUNT = 10;
 
 @TestFixture("Number")
 export default class NumTest {
+    @Test("it normalises negative zero")
+    public itNormalisesNegativeZero() {
+        const num = new Num(-0);
+        Expect(num).toBe(new Num(0));
+        Expect(num.toString()).toBe("0");
+    }
+
     @TestCases(NumTest.invalidNumberExamples)
     @Test("it disallows invalid number values")
     public itDisallowsInvalidNumberValues(value: any) {
@@ -739,6 +746,61 @@ export default class NumTest {
         ];
     }
 
+    @Test("it rejects empty allocation ratio lists")
+    public itRejectsEmptyAllocationRatioLists() {
+        const num = new Num(100);
+
+        const throwFn1 = () => num.allocate([]).next();
+        Expect(throwFn1).toThrowError(Error, "Cannot allocate to none, ratios cannot be an empty array.");
+
+        const throwFn2 = () => num.allocateNamed({});
+        Expect(throwFn2).toThrowError(Error, "Cannot allocate to none, ratios cannot be an empty mapping.");
+    }
+
+    @Test("it rejects allocation ratio lists that sum to zero")
+    public itRejectsAllocationRatioListsThatSumToZero() {
+        const num = new Num(100);
+        const errMsg = "Cannot allocate to none, sum of ratios must be greater than zero.";
+
+        for (let x = 1; x < 10; x++) {
+            const ratios: number[] = [];
+            ratios.length = x;
+            ratios.fill(0, 0, x);
+            const throwFn1 = () => num.allocate(ratios).next();
+            Expect(throwFn1).toThrowError(Error, errMsg);
+
+            const namedRatios: { [name: string]: number } = {};
+            for (let y = 1; y <= x; y++) {
+                namedRatios["x".repeat(y)] = 0;
+            }
+            const throwFn2 = () => num.allocateNamed(namedRatios);
+            Expect(throwFn2).toThrowError(Error, errMsg);
+        }
+    }
+
+    @Test("it rejects allocation ratios that are less than zero")
+    public itRejectsAllocationRatiosLessThanZero() {
+        const num = new Num(100);
+        const errMsg = "Cannot allocate to none, ratio must be zero or positive.";
+
+        for (let x = 2; x < 10; x++) {
+            const ratios: number[] = [];
+            ratios.length = x;
+            ratios.fill(2, 0, x);
+            ratios[x - 1] = -1;
+            const throwFn1 = () => num.allocate(ratios).next();
+            Expect(throwFn1).toThrowError(Error, errMsg);
+
+            const namedRatios: { [name: string]: number } = {};
+            for (let y = 1; y <= x; y++) {
+                namedRatios["z".repeat(y)] = x;
+            }
+            namedRatios["q"] = -1;
+            const throwFn2 = () => num.allocateNamed(namedRatios);
+            Expect(throwFn2).toThrowError(Error, errMsg);
+        }
+    }
+
     @TestCases(NumTest.allocationTargetExamples)
     @Test("it allocates an amount to N targets")
     public itAllocatesAmountToNTargets(amount: number, target: number, results: number[]) {
@@ -765,6 +827,19 @@ export default class NumTest {
             [101, 3, [34, 34, 33]],
             [100.01, 3, [34, 34, 33]],
         ];
+    }
+
+    @Test("it rejects invalid targets when allocating to a fixed number of targets")
+    public itRejectsInvalidTargetsForAllocateTo() {
+        const num = new Num(100);
+
+        const throwFnInt = () => num.allocateTo("matt" as unknown as number).next();
+        Expect(throwFnInt).toThrowError(Error, "Number of targets must be an integer.");
+
+        for (let x = 0; x > -10; x--) {
+            const throwFnPos = () => num.allocateTo(x).next();
+            Expect(throwFnPos).toThrowError(Error, "Cannot allocate to none, target count must be greater than zero.");
+        }
     }
 
     @TestCases(NumTest.absoluteExamples)
@@ -1248,6 +1323,21 @@ export default class NumTest {
 
         Expect(throwLeft).toThrowError(Error, "Can only shift by whole number amounts.");
         Expect(throwRight).toThrowError(Error, "Can only shift by whole number amounts.");
+    }
+
+    @Test("it rejects unknown rounding modes")
+    public itRejectsUnknownRoundingModes() {
+        const num = new Num(123.5);
+
+        const throwFns = [
+            () => num.round("unknown" as unknown as RoundingMode),
+            () => num.roundToDecimalPlaces(0, "unknown" as unknown as RoundingMode),
+            () => num.toRoundedString(0, "unknown" as unknown as RoundingMode),
+        ];
+
+        for (const throwFn of throwFns) {
+            Expect(throwFn).toThrowError(Error, "Unrecognised rounding mode.");
+        }
     }
 
     @Test("it converts to JSON")

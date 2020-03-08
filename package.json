@@ -9,6 +9,9 @@
     },
     "devDependencies": {
         "@istanbuljs/nyc-config-typescript": "^1.0.1",
+        "@stryker-mutator/core": "^2.5.0",
+        "@stryker-mutator/html-reporter": "^2.5.0",
+        "@stryker-mutator/typescript": "^2.5.0",
         "alsatian": "^3.2.1",
         "nyc": "^15.0.0",
         "source-map-support": "^0.5.16",
@@ -18,8 +21,9 @@
     },
     "scripts": {
         "build": "tsc --module esnext",
-        "test": "node run-tests.js 'tests/**/*.test.ts'",
-        "coverage": "nyc --reporter=lcov --reporter=html yarn run test"
+        "test": "node run-tests.js 'tests/**/*.test.*'",
+        "coverage": "nyc --reporter=lcov --reporter=html yarn run test",
+        "mutate": "stryker run"
     },
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
