@@ -19,11 +19,46 @@ export default class NumTest {
         const num = new Num(-0);
         Expect(num).toBe(new Num(0));
         Expect(num.toString()).toBe("0");
+        Expect(num.integerPart).toBe("0");
+        Expect(num.fractionalPart).toBe("");
         Expect(num).toBeZero();
         Expect(num).not.toBePositive();
         Expect(num).toBePositiveOrZero();
         Expect(num).not.toBeNegative();
         Expect(num).toBeNegativeOrZero();
+    }
+
+    @Test("it accepts instances of the underlying BigNumber class")
+    public itAcceptsBigNumberInstances() {
+        const plainNum = new Num(42);
+
+        const bigNum = new Num.BigNumber(42);
+        const bigNumNum = new Num(bigNum);
+        Expect(bigNumNum).toBe(plainNum);
+    }
+
+    @Test("it converts all numbers to bignumbers")
+    public itConvertsAllNumbersToBigNumbers() {
+        const actualNum = new Num(5);
+        const actualNumBigNum = Num.convertToBigNum(actualNum);
+        Expect(actualNumBigNum instanceof Num.BigNumber).toBe(true);
+        Expect(actualNumBigNum.toString()).toBe("5");
+
+        const bigNum = new Num.BigNumber(7);
+        const bigNumBigNum = Num.convertToBigNum(bigNum);
+        Expect(bigNumBigNum instanceof Num.BigNumber).toBe(true);
+        Expect(bigNum === bigNumBigNum).toBe(true);
+        Expect(bigNumBigNum.toString()).toBe("7");
+
+        const numberNum = 12;
+        const numberNumBigNum = Num.convertToBigNum(numberNum);
+        Expect(numberNumBigNum instanceof Num.BigNumber).toBe(true);
+        Expect(numberNumBigNum.toString()).toBe("12");
+
+        const stringNum = "21";
+        const stringNumBigNum = Num.convertToBigNum(stringNum);
+        Expect(stringNumBigNum instanceof Num.BigNumber).toBe(true);
+        Expect(stringNumBigNum.toString()).toBe("21");
     }
 
     @TestCases(NumTest.invalidNumberExamples)
@@ -92,13 +127,17 @@ export default class NumTest {
     @TestCases(NumTest.equalityExamples)
     @Test("it equals to another number")
     public itEqualsToAnotherNumber(amount: number, equality: boolean) {
-        const num = new Num(DEFAULT_AMOUNT);
-        const compareTo = new Num(amount);
+        const checkFn = (num: Num, otherNum: Num | BigNumber | number): void => {
+            Expect(num.equals(otherNum)).toBe(equality);
+            Expect(num.equalTo(otherNum)).toBe(equality);
+            Expect(num.equalsTo(otherNum)).toBe(equality);
+            Expect(num.isEqualTo(otherNum)).toBe(equality);
+        };
 
-        Expect(num.equals(compareTo)).toBe(equality);
-        Expect(num.equalTo(compareTo)).toBe(equality);
-        Expect(num.equalsTo(compareTo)).toBe(equality);
-        Expect(num.isEqualTo(compareTo)).toBe(equality);
+        const num = new Num(DEFAULT_AMOUNT);
+        checkFn(num, amount);
+        checkFn(num, new Num(amount));
+        checkFn(num, new Num.BigNumber(amount));
     }
 
     public static equalityExamples() {
@@ -114,7 +153,7 @@ export default class NumTest {
     @TestCases(NumTest.comparisonExamples)
     @Test("it compares two numbers")
     public itComparesTwoNumbers(otherAmount: number, result: number) {
-        const checkFn = (num: Num, otherNum: Num | number): void => {
+        const checkFn = (num: Num, otherNum: Num | BigNumber | number): void => {
             Expect(num.compare(otherNum)).toBe(result);
             Expect(num.compareTo(otherNum)).toBe(result);
             Expect(num.comparedTo(otherNum)).toBe(result);
@@ -142,6 +181,8 @@ export default class NumTest {
         }
 
         checkFn(num, otherAmount);
+        checkFn(num, new Num(otherAmount));
+        checkFn(num, new Num.BigNumber(otherAmount));
     }
 
     public static comparisonExamples() {
@@ -388,11 +429,17 @@ export default class NumTest {
     @Test("multiplying by zero always gives zero")
     public multiplyingByZeroGivesZero(amount: Num | number) {
         const num = new Num(amount);
-        const multipliedNum = num.multiply(0);
 
-        Expect(multipliedNum instanceof Num).toBeTruthy();
-        Expect(multipliedNum.toString()).toBe("0");
-        Expect(multipliedNum).toEqual(new Num(0));
+        const checkFn = (multiplier: Num | BigNumber | number): void => {
+            const multipliedNum = num.multiply(multiplier);
+            Expect(multipliedNum instanceof Num).toBeTruthy();
+            Expect(multipliedNum.toString()).toBe("0");
+            Expect(multipliedNum).toEqual(new Num(0));
+        };
+
+        checkFn(0);
+        checkFn(new Num(0));
+        checkFn(new Num.BigNumber(0));
     }
 
     // TOOD: Introduce property-based testing for this test
