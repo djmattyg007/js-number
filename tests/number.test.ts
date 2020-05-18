@@ -29,14 +29,14 @@ export default class NumTest {
     @TestCases(NumTest.invalidNumberExamples)
     @Test("it disallows invalid number values")
     public itDisallowsInvalidNumberValues(value: any) {
-        const throwFn = () => new Num(value as numeric);
+        const throwFn = () => new Num(value);
         Expect(throwFn).toThrowError(Error, "Invalid number supplied.");
     }
 
     @TestCases(NumTest.invalidNumberExamples)
     @Test("it disallows converting to bignumbers from invalid number values")
     public itDisallowsConvertingToBigNumberFromInvalidNumberValues(value: any) {
-        const throwFn = () => Num.convertToBigNum(value as numeric);
+        const throwFn = () => Num.convertToBigNum(value);
         Expect(throwFn).toThrowError(Error, "Invalid number supplied.");
     }
 
@@ -875,7 +875,8 @@ export default class NumTest {
     public itRejectsInvalidTargetsForAllocateTo() {
         const num = new Num(100);
 
-        const throwFnInt = () => num.allocateTo("matt" as unknown as number).next();
+        // @ts-expect-error
+        const throwFnInt = () => num.allocateTo("matt").next();
         Expect(throwFnInt).toThrowError(Error, "Number of targets must be an integer.");
 
         for (let x = 0; x > -10; x--) {
@@ -1372,9 +1373,12 @@ export default class NumTest {
         const num = new Num(123.5);
 
         const throwFns = [
-            () => num.round("unknown" as unknown as RoundingMode),
-            () => num.roundToDecimalPlaces(0, "unknown" as unknown as RoundingMode),
-            () => num.toRoundedString(0, "unknown" as unknown as RoundingMode),
+            // @ts-expect-error
+            () => num.round("unknown"),
+            // @ts-expect-error
+            () => num.roundToDecimalPlaces(0, "unknown"),
+            // @ts-expect-error
+            () => num.toRoundedString(0, "unknown"),
         ];
 
         for (const throwFn of throwFns) {
