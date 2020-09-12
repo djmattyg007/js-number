@@ -433,13 +433,13 @@ export default class Num {
         return this._decimalPlaces(decimalPlaces, roundingMode).toFixed(decimalPlaces);
     }
 
-    public *allocate(ratios: number[]): Generator<Num> {
+    public *allocate(ratios: ReadonlyArray<number>): Generator<Num> {
         for (const bigNum of Num.allocate(this.num, ratios)) {
             yield new Num(bigNum);
         }
     }
 
-    public static allocate(amount: Num | numeric, ratios: number[]): Iterable<BigNumber> {
+    public static allocate(amount: Num | numeric, ratios: ReadonlyArray<number>): Iterable<BigNumber> {
         if (ratios.length === 0) {
             throw new Error("Cannot allocate to none, ratios cannot be an empty array.");
         }

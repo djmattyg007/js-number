@@ -761,7 +761,7 @@ export default class NumTest {
 
     @TestCases(NumTest.allocationExamples)
     @Test("it allocates an amount")
-    public itAllocatesAmount(amount: number, ratios: number[], results: number[]) {
+    public itAllocatesAmount(amount: number, ratios: ReadonlyArray<number>, results: ReadonlyArray<number>) {
         const num = new Num(amount);
         const allocated = num.allocate(ratios);
 
@@ -888,7 +888,7 @@ export default class NumTest {
 
     @TestCases(NumTest.allocationTargetExamples)
     @Test("it allocates an amount to N targets")
-    public itAllocatesAmountToNTargets(amount: number, target: number, results: number[]) {
+    public itAllocatesAmountToNTargets(amount: number, target: number, results: ReadonlyArray<number>) {
         const num = new Num(amount);
         const allocated = num.allocateTo(target);
 
@@ -1502,25 +1502,25 @@ export default class NumTest {
 
     @TestCases(minExamples)
     @Test("it calculates min")
-    public itCalculatesMin(values: Num[], min: Num) {
+    public itCalculatesMin(values: ReadonlyArray<Num>, min: Num) {
         Expect(Num.min(...values)).toBe(min);
     }
 
     @TestCases(maxExamples)
     @Test("it calculates max")
-    public itCalculatesMax(values: Num[], max: Num) {
+    public itCalculatesMax(values: ReadonlyArray<Num>, max: Num) {
         Expect(Num.max(...values)).toBe(max);
     }
 
     @TestCases(sumExamples)
     @Test("it calculates sums")
-    public itCalculatesSum(values: Num[], sum: Num) {
+    public itCalculatesSum(values: ReadonlyArray<Num>, sum: Num) {
         Expect(Num.sum(...values)).toBe(sum);
     }
 
     @TestCases(avgExamples)
     @Test("it calculates averages")
-    public itCalculatesAverage(values: Num[], avg: Num) {
+    public itCalculatesAverage(values: ReadonlyArray<Num>, avg: Num) {
         Expect(Num.avg(...values)).toBe(avg);
     }
 

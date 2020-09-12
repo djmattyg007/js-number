@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { numeric } from "./types";
 
-export function arraySum(arr: number[]): number {
+export function arraySum(arr: ReadonlyArray<number>): number {
     let sum = 0;
 
     for (const num of arr) {
