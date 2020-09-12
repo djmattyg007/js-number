@@ -19,7 +19,7 @@
         "typescript": "^4.0.2"
     },
     "scripts": {
-        "build": "tsc --module esnext",
+        "build": "tsc --module esnext --noEmitOnError",
         "test": "node run-tests.js 'tests/**/*.test.*'",
         "test-fast": "CM_TEST_FAST=true node run-tests.js 'tests/**/*.test.*'",
         "coverage": "nyc --reporter=lcov --reporter=html yarn run test",
